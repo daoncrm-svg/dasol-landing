@@ -1,0 +1,67 @@
+/*안을비추가 - 노토산스 부드러움*/
+
+@charset "utf-8";
+
+
+@font-face{
+	font-family: 'Noto Sans';
+	font-weight: 100; /* ((( 350 */
+	src: url('/skins/blockContent/font/NotoSans-Thin.eot');
+	src: local('☺'),
+				url(/skins/blockContent/font/NotoSans-Thin.woff2) format('woff2'),*/
+				url('/skins/blockContent/font/NotoSans-Thin.woff') format('woff');
+}
+@font-face{
+	font-family: 'Noto Sans';
+	font-weight: 300; /* ((( 350 */
+	src: url('/skins/blockContent/font/NotoSans-Light.eot');
+	src: local('☺'),
+				url(/skins/blockContent/font/NotoSans-Light.woff2) format('woff2'),*/
+				url('/skins/blockContent/font/NotoSans-Light.woff') format('woff');
+}
+
+@font-face{
+	font-family: 'Noto Sans';
+	font-weight: 400; /* ((( 350 */
+	src: url('/skins/blockContent/font/NotoSans-DemiLight.eot');
+	src: local('☺'),
+				url(/skins/blockContent/font/NotoSans-DemiLight.woff2) format('woff2'),
+				url('/skins/blockContent/font/NotoSans-DemiLight.woff') format('woff');
+}
+@font-face{
+	font-family: 'Noto Sans';
+	font-weight: 500; /* ((( 400 */
+	src: url('/skins/blockContent/font/NotoSans-Regular.eot');
+	src: local('☺'),
+				url(/skins/blockContent/font/NotoSans-Regular.woff2) format('woff2'),
+				url('/skins/blockContent/font/NotoSans-Regular.woff') format('woff');
+}
+@font-face{
+	font-family: 'Noto Sans';
+	font-weight: 600; /* ((( 500 */
+	src: url('/skins/blockContent/font/NotoSans-Medium.eot');
+	src: local('☺'),
+				url(/skins/blockContent/font/NotoSans-Medium.woff2) format('woff2'),
+				url('/skins/blockContent/font/NotoSans-Medium.woff') format('woff');
+}
+@font-face{
+	font-family: 'Noto Sans';
+	font-weight: 700;
+	src: url('/skins/blockContent/font/NotoSans-Bold.eot');
+	src: local('☺'),
+				url(/skins/blockContent/font/NotoSans-Bold.woff2) format('woff2'),
+				url('/skins/blockContent/font/NotoSans-Bold.woff') format('woff');
+}
+
+
+
+
+
+@font-face{
+	font-family: 'NEXON Lv1 Gothic';
+	font-weight: 300;
+	src: url('/skins/blockContent/font/NEXON Lv1 Gothic Low OTF.eot');
+	src: local('☺'),
+				url('/skins/blockContent/font/NEXON Lv1 Gothic Low OTF.woff') format('woff');
+}
+

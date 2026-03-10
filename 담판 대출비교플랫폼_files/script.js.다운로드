@@ -1,0 +1,44 @@
+function submitForm() {
+  const form = document.querySelector("#inquiry-form");
+
+  if(form.querySelector("#submitFlag").value != "0") {
+    alert("처리중입니다. 잠시 기다려주세요.");
+    return;
+  }
+
+  let emptyColumn = Array.from(form.querySelectorAll(".required")).find(el=>{
+    if(el.type == "radio" || el.type == "checkbox") {
+      return (form.querySelectorAll("[name='"+el.name+"']:checked").length < 1);
+    } else {
+      return (el.value.trim() == "");
+    }
+  });
+
+  if(emptyColumn) {
+    const label = emptyColumn.dataset.label.trim();
+    let alertMessage = label + (checkBatchimEnding(label) === true ? "을":"를")+" ";
+
+    if(emptyColumn.type == "radio" || emptyColumn.type == "checkbox" || emptyColumn.type == "select-one") {
+      alertMessage += "선택해주세요.";
+    } else {
+      alertMessage += "입력해주세요.";
+    }
+
+    alert(alertMessage);
+    emptyColumn.focus();
+    return;
+  }
+
+  const check = document.querySelector("#inquery_check");
+  if(check && !check.checked) {
+    alert("개인정보처리방침에 동의해주세요.");
+    return;
+  }
+  
+  form.method = "post";
+  form.target = "hidden_frame";
+  form.action = _PACK_URL+"/inquiry/act.php";
+  form.querySelector("#submitFlag").value = "1";
+
+  form.submit();
+}

@@ -1,0 +1,638 @@
+@import url('/css/button.css');
+
+
+
+@font-face {    
+    font-family: "돋움";
+    src: local("Apple SD Gothic Neo");
+}
+
+@font-face {
+    font-family: Dotum;
+    src: local("Apple SD Gothic Neo");
+}
+
+@font-face {
+    font-family: DotumChe;
+    src: local("Apple SD Gothic Neo");
+}
+
+@font-face {
+    font-family: "굴림";
+    src: local("Apple SD Gothic Neo");
+}
+
+@font-face {
+    font-family: Gulim;
+    src: local("Apple SD Gothic Neo");
+}
+
+@font-face {
+    font-family: GulimChe;
+    src: local("Apple SD Gothic Neo");
+}
+
+@font-face {
+    font-family: AppleGothic;
+    src: local("Apple SD Gothic Neo");
+}
+@font-face {
+  font-family: 'NEXON-Lv1-Gothic-Low-OTF';
+  src: url('/skins/font/NEXON Lv1 Gothic Low OTF.eot');
+  src: url('/skins/font/NEXON Lv1 Gothic Low OTF.eot?#iefix') format('embedded-opentype'), /* ie 6,7,8 적용 embedded-opentype ie 8,9 적용 */
+       url('/skins/font/NEXON Lv1 Gothic Low OTF.woff') format('woff'); /* ie 제외한 나머지 */
+
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Spoqa-Han-Sans';
+  src: url('/skins/font/SpoqaHanSansNeo-Regular.eot');
+  src: url('/skins/font/SpoqaHanSansNeo-Regular.eot?#iefix') format('embedded-opentype'), /* ie 6,7,8 적용 embedded-opentype ie 8,9 적용 */
+       url('/skins/font/SpoqaHanSansNeo-Regular.woff') format('woff'); /* ie 제외한 나머지 */
+
+  font-weight: normal;
+  font-style: normal;
+}
+@import url('//fonts.googleapis.com/earlyaccess/notosanskr.css');/*Noto Sans KR*/
+@import url('https://cdn.rawgit.com/moonspam/NanumSquare/master/nanumsquare.css');/*NanumSquare*/
+@import url('http://fonts.googleapis.com/earlyaccess/nanumgothic.css');/*Nanum Gothic*/
+@import url('//fonts.googleapis.com/earlyaccess/nanummyeongjo.css');/*Nanum Myeongjo*/
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://fastly.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Freesentation-9Black';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-9Black.woff2') format('woff2');
+    font-weight: 900;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'NotoSerifKR';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NotoSerifKR.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'KCC-Hanbit';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2403-2@1.0/KCC-Hanbit.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'BagelFatOne';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_JAMO@1.0/BagelFatOne.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Cafe24Ssurround';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/Cafe24Ssurround.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Diphylleia';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_JAMO@1.0/Diphylleia.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'TTHakgyoansimMonggeulmonggeulR';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2402_keris@1.0/TTHakgyoansimMonggeulmonggeulR.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Anssang';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/naverfont_01@1.0/Anssang.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'BMJUA';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMJUA.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'GowunBatang';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GowunBatang.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Cafe24Supermagic-Bold-v1.0';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2307-2@1.0/Cafe24Supermagic-Bold-v1.0.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'LINESeedKR-Bd';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_11-01@1.0/LINESeedKR-Bd.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'NanumSquareRound';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NanumSquareRound.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'TTHakgyoansimMoheomgaB';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2402_keris@1.0/TTHakgyoansimMoheomgaB.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Cafe24Shiningstar';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.1/Cafe24Shiningstar.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'TTHakgyoansimKkwabaegiR';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2402_keris@1.0/TTHakgyoansimKkwabaegiR.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'TTHakgyoansimKossuyeomR';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2402_keris@1.0/TTHakgyoansimKossuyeomR.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Danjo-bold';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2307-1@1.1/Danjo-bold.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'BMEULJIRO';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.0/BMEULJIRO.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'kdg_Medium';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts-20-12@1.0/kdg_Medium.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'SDSamliphopangche_Basic';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts-20-12@1.0/SDSamliphopangche_Basic.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Yeongdo-Rg';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2202-2@1.0/Yeongdo-Rg.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Handletter';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/naverfont_05@1.0/Handletter.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'KCC-Ahnchangho';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2402_1@1.0/KCC-Ahnchangho.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.limitTxt{
+	white-space:nowrap !important;
+	overflow:hidden !important;
+	text-overflow:ellipsis !important;
+}
+
+.after:after{content:"";clear:both;display:block;}
+.clearfix{*zoom:1}
+.clearfix:after{clear:both;display:block;content:'';}
+
+body { background-color:#ffffff !important }
+
+a:link {color:#333;text-decoration: none;}
+a:visited {color:#333;text-decoration: none;}
+a:hover {color: #212121;text-decoration: none;}
+a:active {color: #333;text-decoration: none;}
+
+a{transition:color 0.2s;}
+
+textarea{resize:none;}
+
+/* 개인정보 수집 및 이용동의 */
+.table_collapse{width:100%;border-collapse: collapse;}
+.tdLine01{border:1px solid #e0e0e0;}
+.tdLine02{border:1px solid #e0e0e0;font-size:15px;font-weight:bold;color:#000;padding:10px;text-align:center;}
+.tdLine03{border:1px solid #e0e0e0;padding:5px;font-size:14px;}
+.tdLine04{border:1px solid #e0e0e0;padding:5px;font-size:14px;text-align:center;}
+
+.tbl01{font-size:15px;font-weight:bold;background:#777;color:#fff;padding:10px;font-family:'NanumGothic';}
+.tbl02{font-size:12px;font-weight:bold;background:#777;color:#fff;padding:10px;font-family:'NanumGothic';}
+
+.tbl03{font-size:15px;font-weight:bold;background:#777;color:#fff;padding:10px;font-family:'NanumGothic';}
+.tbl04{font-size:12px;font-weight:bold;background:#777;color:#fff;padding:10px;font-family:'NanumGothic';}
+
+
+.table_collapse input[type="radio"]{
+	width:20px;
+	height:20px;
+	vertical-align: -5px;
+	cursor:pointer;
+}
+
+
+
+/* 쇼핑몰 스킨 사용테이블 */
+.stab_tit   {font-size: 12px; background-color:f9f9f9;padding-left:15px;height:30px;}
+.stab_tit_b   {font-size: 12px; background-color:f9f9f9;padding-left:15px;height:30px;font-weight:bold;}
+.stab_tit_b_c   {font-size: 12px; background-color:f9f9f9;height:30px;font-weight:bold;text-align:center;}
+.stab_tit_r_c   {font-size: 12px; background-color:f9f9f9;color:#de712e;height:30px;font-weight:bold;text-align:center;}
+.stab	   {font-size: 12px; padding-left:10px;}
+.stab_b	   {font-size: 12px; padding-left:10px;font-weight:bold;}
+.stab_b_c	   {font-size: 12px; text-align:center;font-weight:bold;}
+
+.stxt01{font-size: 15px;color:#de712e;font-weight:bold;}
+.stxt02{font-size: 15px;color:#52809a;font-weight:bold;}
+
+/* 주문정보 입력폼 */
+.sinp01{padding-top:5px;height:25px;}
+
+
+.amount_title_1{
+	font-size: 12px;
+	text-align:center;
+	font-weight:bold;
+	background-color:#f9f9f9;
+	height:30px;
+
+	border-top:1px solid #cccccc;
+	border-bottom:1px solid #cccccc;
+}
+.amount_title_1_b{
+	font-size: 12px;
+	text-align:center;
+	font-weight:bold;
+	background:none;
+	height:30px;
+
+	border-top:1px solid #cccccc;
+	border-bottom:1px solid #cccccc;
+}
+
+.amount_title_2{
+	font-size: 12px;
+	text-align:center;
+	font-weight:bold;
+	background-color:#f9f9f9;
+	height:30px;
+
+	border:1px solid #cccccc;
+}
+
+.amount_title_2_b{
+	font-size: 12px;
+	text-align:center;
+	font-weight:bold;
+	background:none;
+	height:30px;
+
+	border:1px solid #cccccc;
+}
+.amount_title_3{
+	font-size: 12px;
+	text-align:center;
+	font-weight:bold;
+	background-color:#f8f9fa;
+	height:30px;
+
+	border-top:1px solid #cccccc;
+	border-bottom:1px solid #cccccc;
+}
+.amount_title_4{
+	font-size: 12px;
+	text-align:center;
+	font-weight:bold;
+	background-color:#f9f9f9;
+	height:30px;
+
+	border:1px solid #cccccc;
+}
+
+
+
+.amount_table_1{
+	font-size: 12px;
+	padding-left:15px;
+	font-weight:bold;
+	height:30px;
+
+	border-bottom:1px solid #cccccc;
+}
+
+.amount_table_2{
+	font-size: 12px;
+	text-align:center;
+	height:30px;
+
+	border:1px solid #cccccc;
+	border-top:0px;
+}
+
+.amount_table_3{
+	font-size: 12px;
+	text-align:center;
+	font-weight:bold;
+	height:30px;
+	
+	border-bottom:1px solid #cccccc;
+}
+
+.amount_table_4{
+	font-size: 12px;
+	padding-left:15px;
+	height:30px;
+
+	border-bottom:1px solid #cccccc;
+}
+
+
+
+
+.ShopTable {border-collapse:collapse;border-spacing:0px;width:100%;}
+
+.ShopTable th {
+	border:1px solid #ccc;
+	height:30px;
+	color:#777;
+	font-weight:600;
+	font-size:13px;
+	background:#f9f9f9;
+	text-align:left;
+	padding:0px 0px 0px 15px;
+}
+
+.ShopTable td {
+	border:1px solid #ccc;
+	height:30px;
+	color:#777;
+	font-size:12px;
+	padding:10px;
+}
+
+.ShopTable td input[type="text"], input[type="password"]{
+	padding:0px 0px 0px 10px;
+	height:30px;
+	border:1px solid #bbb;
+}
+
+.ShopTable td table td{
+	border:0px;
+	padding:0px;
+	height:10px;
+}
+
+.ShopTable input[type="radio"]{
+	width:20px;
+	height:20px;
+	vertical-align: -5px;
+	cursor:pointer;
+}
+
+input[type="radio"],input[type="checkbox"]{vertical-align: -2.5px;}
+
+.ks_red:link { color:#de712e; font-family : 돋움,굴림; text-decoration: none;}
+.ks_red:visited { color:#de712e; font-family : 돋움,굴림; text-decoration: none;}
+.ks_red:hover { color:#de712e; font-family : 돋움,굴림; text-decoration: none; font-weight:bold;}
+.ks_red:active { color:#de712e; font-family : 돋움,굴림; text-decoration: none;}
+
+
+
+.gTable {border-collapse:collapse;border-spacing:0px;width:100%;}
+.gTable th {
+	border:1px solid #ccc;
+	height:30px;
+	color:#444;
+	font-weight:600;
+	font-size:13px;
+	background:#f9f9f9;
+	text-align:left;
+	padding:0px 0px 0px 15px;
+}
+
+.gTable td {
+	border:1px solid #ccc;
+	height:30px;
+	color:#444;
+	font-size:12px;
+	padding:10px;
+}
+
+.gTable td input[type="text"],.gTable input[type="password"]{
+	padding:0px 0px 0px 10px;
+	height:30px;
+	border:1px solid #bbb;
+}
+
+.gTable td table td{
+	border:0px;
+	padding:0px;
+	height:10px;
+}
+
+
+
+.bTable {border-collapse:collapse;border-spacing:0px;width:100%;}
+.bTable th {
+	border:1px solid #ccc;
+	height:30px;
+	color:#ffffff;
+	font-weight:600;
+	font-size:13px;
+	text-align:left;
+	padding:0px 0px 0px 15px;
+}
+
+.bTable td {
+	border:1px solid #ccc;
+	height:30px;
+	color:#ffffff;
+	font-size:12px;
+	padding:10px;
+}
+.bTable td a {
+	color:#ffffff;
+}
+
+.bTable td input[type="text"],.bTable td  input[type="password"]{
+	padding:0px 0px 0px 10px;
+	height:30px;
+	border:1px solid #bbbbbb;
+	background:none;
+	color:#ffffff;
+}
+
+.bTable td table td{
+	border:0px;
+	padding:0px;
+	height:10px;
+}
+.blockTable {
+	 width: 100%;
+	 font-family: inherit !important;
+	 font-size: 15px !important;
+	 border-top: 1px solid #777;
+	 border-collapse: collapse 
+}
+.blockTable thead th, .blockTable thead td, .blockTable tbody td, .blockTable thead th font, .blockTable thead th span, .blockTable thead td font, .blockTable thead td span, .blockTable tbody td font, .blockTable tbody td span {
+	 font-family: inherit !important;
+	 font-size: inherit !important
+}
+
+.blockTable  th{
+	 word-break: keep-all;
+	 background: #fafafa;
+	 border-bottom: 1px solid #e7e7e7
+}
+.blockTable tbody tr td {
+	 padding: 15px;
+	 border-bottom: 1px solid #e7e7e7
+}
+.blockTable tbody tr td input[type=text], .blockTable tbody tr td input[type=password], .blockTable tbody tr td select, .blockTable tbody tr td textarea {
+	 font: inherit !important;
+	 width: 97%;
+	 border: 1px solid #e5e5e5
+}
+.blockTable tbody tr td input[type=text]:focus, .blockTable tbody tr td input[type=password]:focus, .blockTable tbody tr td select:focus, .blockTable tbody tr td textarea:focus {
+	 color: #333;
+	 border-color: #555;
+	 background-color: #fafafa
+}
+.blockTable tbody tr td input[type=text], .blockTable tbody tr td input[type=password] {
+	 height: 35px;
+}
+.blockTable tbody tr td input[name^=mobile], .blockTable tbody tr td input[name^=phone] {
+	 width: 50px !important
+}
+.blockTable tbody tr td input[type=file] {
+	 width: 100%;
+	 height: 35px
+}
+.blockTable tbody tr td select {
+	padding: 0 30px 0 10px
+}
+.blockTable tbody tr td textarea {
+	 padding: 10px;
+	 resize: none
+}
+
+/* 관리자 설정버튼 롤오버시 컨텐츠영역 불투명처리(예:배너설정, 게시판설정..) */
+.bannerGuideOn{
+	display:block;
+	position:absolute;
+	background:#000;
+	-moz-opacity:0.5 !important;-webkit-opacity:0.5 !important;-ms-filter:'progid:DXImageTransform.Microsoft.Alpha(Opacity=50)' !important;filter:alpha(opacity=50) !important;opacity:0.5 !important
+}
+.bannerGuideOff{
+	display:none;
+}
+
+.bannerGuideFreeOn{background:#000;}
+.bannerGuideFreeOn img{
+	-moz-opacity:0.5 !important;-webkit-opacity:0.5 !important;-ms-filter:'progid:DXImageTransform.Microsoft.Alpha(Opacity=50)' !important;filter:alpha(opacity=50) !important;opacity:0.5 !important
+}
+
+/* 쇼핑몰 제품옵션 */
+.ggTable {border-collapse:collapse;border-spacing:0px;width:100%;}
+.ggTable th {
+	border:1px solid #ccc;
+	height:40px;
+	color:#777;
+	font-weight:600;
+	font-size:12px;
+	background:#f9f9f9;
+	text-align:center;
+	padding:0;
+}
+
+.ggTable th:first-child{
+	border-left:0px;
+}
+
+.ggTable th:last-child{
+	border-right:0px;
+}
+
+.ggTable td {
+	text-align:center;
+	border:1px solid #ccc;
+	height:40px;
+	color:#777;
+	font-size:12px;
+	padding:5px 10px;
+}
+
+.ggTable td:first-child{
+	border-left:0px;
+}
+
+.ggTable td:last-child{
+	border-right:0px;
+}
+
+.ggTable td input[type="text"],.ggTable input[type="password"],select{
+	padding:0px 0px 0px 10px;
+	height:28px;
+	border:1px solid #bbb;
+}
+
+
+
+::-webkit-input-placeholder { /* 크롬 */
+   color:#aaa;
+}
+:-moz-placeholder { /* 파이어폭스 */
+   color:#aaa;
+   opacity:  1;
+}
+::-moz-placeholder { /* 파이어폭스 */
+   color:#aaa;
+   opacity:  1;
+}
+:-ms-input-placeholder { /* 인터넷 익스플로러 */
+   color:#aaa;
+}
+::placeholder {
+   color:#aaa;
+   opacity:  1;
+}
+
+.effLeft{position:relative;left:-50px;opacity:0;transition:all 1.2s;}
+.effRight{position:relative;left:50px;opacity:0;transition:all 1.2s;}
+.effTop{position:relative;top:-50px;opacity:0;transition:all 1.2s;}
+.effBottom{position:relative;top:50px;opacity:0;transition:all 1.2s;}
+.effAction{
+	top:0;
+	left:0;
+	bottom:0;
+	opacity: 1;
+}
+.effDelay2{transition-delay:0.2s}
+.effDelay4{transition-delay:0.4s}
+.effDelay6{transition-delay:0.6s}
+.effDelay8{transition-delay:0.8s}
+.effDelay10{transition-delay:1s}
+.effDelay12{transition-delay:1.2s}

@@ -1,0 +1,10 @@
+@font-face {
+  font-family: 'NanumBarunGothic';
+  src: url('/skins/font/NanumBarunGothic.eot');
+  src: url('/skins/font/NanumBarunGothic.eot?#iefix') format('embedded-opentype'), /* ie 6,7,8 적용 embedded-opentype ie 8,9 적용 */
+       url('/skins/font/NanumBarunGothic.woff') format('woff'), /* ie 제외한 나머지 */
+       url('/skins/font/NanumBarunGothic.ttf') format('truetype'),
+       url('/skins/font/NanumBarunGothic.svg#NanumBarunGothic') format('svg'); /*모바일브라우져를 위해서*/
+  font-weight: normal;
+  font-style: normal;
+}

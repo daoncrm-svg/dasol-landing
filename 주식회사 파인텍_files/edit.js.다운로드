@@ -1,0 +1,42 @@
+jQuery(document).ready(function(){
+	if( $('.cc-stretchy-nav').length > 0 ) {
+		var stretchyNavs = $('.cc-stretchy-nav');
+		
+		stretchyNavs.each(function(){
+			var stretchyNav = $(this),
+				stretchyNavTrigger = stretchyNav.find('.cc-nav-trigger');
+			
+				
+
+			stretchyNav.on('mouseenter', function(event){
+/*
+				if(stretchyNav.hasClass('nav-is-visible2')){
+					stretchyNavs.fadeIn()		
+				}else{
+					stretchyNavs.not(stretchyNav).fadeOut();		
+				}
+*/
+				event.preventDefault();
+				stretchyNav.addClass('nav-is-visible2');
+			});
+			stretchyNav.on('mouseleave', function(event){
+/*
+				if(stretchyNav.hasClass('nav-is-visible2')){
+					stretchyNavs.fadeIn()		
+				}else{
+					stretchyNavs.not(stretchyNav).fadeOut();		
+				}
+*/
+				event.preventDefault();
+				stretchyNav.removeClass('nav-is-visible2');
+			});
+		});
+		/*
+		$(document).on('click', function(event){
+			( !$(event.target).is('.cc-nav-trigger') && !$(event.target).is('.cc-nav-trigger span') ) && stretchyNavs.removeClass('nav-is-visible2') && $(".UDbtn").removeClass("btnOpen");;	//여백클릭 시 사라짐
+			
+			//( !$(event.target).is('.cc-nav-trigger') && !$(event.target).is('.cc-nav-trigger span'));
+		});
+		*/
+	}
+});
