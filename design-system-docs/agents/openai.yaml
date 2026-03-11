@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design System Docs"
+  short_description: "Draft design system docs and specs"
+  default_prompt: "Use $design-system-docs to create or refine design system documentation for this product."
