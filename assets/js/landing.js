@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavTracking();
   initSmoothScroll();
   initTrustNumbers();
+  injectSuccessToast();
 });
 
 function initSwiper() {
@@ -83,12 +84,15 @@ function initFaq() {
       document.querySelectorAll('.faq-item').forEach(faqItem => {
         faqItem.classList.remove('open');
         const faqAnswer = faqItem.querySelector('.faq-answer');
+        const faqBtn = faqItem.querySelector('.faq-question');
         if (faqAnswer) faqAnswer.style.maxHeight = '0';
+        if (faqBtn) faqBtn.setAttribute('aria-expanded', 'false');
       });
 
       if (!isOpen && item && answer) {
         item.classList.add('open');
         answer.style.maxHeight = `${answer.scrollHeight}px`;
+        button.setAttribute('aria-expanded', 'true');
       }
     });
   });
@@ -144,7 +148,7 @@ function bindStandardForm(form) {
       return;
     }
 
-    alert('상담 신청이 접수되었습니다.\n담당 상담사가 순차적으로 연락드립니다.');
+    showSuccessToast();
     if (window.incrementCtaCounter) window.incrementCtaCounter();
     form.reset();
   });
@@ -188,7 +192,7 @@ function initFloatingFormVisibility() {
   window.addEventListener('scroll', () => {
     const heroBottom = heroSection.getBoundingClientRect().bottom;
     floatingFormContainer.classList.toggle('visible', heroBottom < 200);
-  });
+  }, { passive: true });
 }
 
 function initFixedBottomBar() {
@@ -204,7 +208,7 @@ function initFixedBottomBar() {
     const shouldShow = heroBottom < 0 && ctaTop > window.innerHeight;
 
     fixedBottomBar.classList.toggle('visible', shouldShow);
-  });
+  }, { passive: true });
 }
 
 function initNavTracking() {
@@ -373,3 +377,41 @@ function initTrustNumbers() {
 
   counters.forEach(counter => observer.observe(counter));
 }
+
+function injectSuccessToast() {
+  if (document.querySelector('.form-success-overlay')) return;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'form-success-overlay';
+  overlay.addEventListener('click', hideSuccessToast);
+
+  const toast = document.createElement('div');
+  toast.className = 'form-success-toast';
+  toast.innerHTML = `
+    <div class="toast-icon">✓</div>
+    <div class="toast-title">상담 신청이 접수되었습니다</div>
+    <div class="toast-desc">담당 상담사가 순차적으로 연락드리겠습니다.<br>잠시만 기다려주세요.</div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(toast);
+}
+
+function showSuccessToast() {
+  const overlay = document.querySelector('.form-success-overlay');
+  const toast = document.querySelector('.form-success-toast');
+  if (!overlay || !toast) return;
+
+  overlay.classList.add('show');
+  toast.classList.add('show');
+
+  setTimeout(() => hideSuccessToast(), 3000);
+}
+
+function hideSuccessToast() {
+  const overlay = document.querySelector('.form-success-overlay');
+  const toast = document.querySelector('.form-success-toast');
+  if (overlay) overlay.classList.remove('show');
+  if (toast) toast.classList.remove('show');
+}
+

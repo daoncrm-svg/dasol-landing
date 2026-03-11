@@ -3577,3 +3577,322 @@ body {
   letter-spacing: -0.03em;
   line-height: 1;
 }
+
+/* =============================================================
+   WEB SKILL ENHANCEMENT — Typography, Motion, Backgrounds, UX
+   ============================================================= */
+
+/* --- 1. Typography: Display Font Pairing --- */
+.hero-title,
+.section-title,
+.trust-section-title,
+.cta-v2-headline {
+  font-family: 'Black Han Sans', 'Pretendard Variable', sans-serif;
+  font-weight: 400; /* Black Han Sans only has 400 */
+}
+
+/* Type Scale CSS Variables */
+:root {
+  --fs-display: clamp(40px, 5vw, 64px);
+  --fs-2xl: 36px;
+  --fs-xl: 28px;
+  --fs-lg: 24px;
+  --fs-md: 20px;
+  --fs-sm: 16px;
+  --fs-xs: 14px;
+}
+
+/* --- 2. Fade-in & Staggered Reveal --- */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children within visible sections */
+.fade-in.visible .trust-number-card,
+.fade-in.visible .trust-card,
+.fade-in.visible .biz-loan-card,
+.fade-in.visible .info-box,
+.fade-in.visible .how-step {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: stagger-in 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.fade-in.visible .trust-number-card:nth-child(1),
+.fade-in.visible .trust-card:nth-child(1),
+.fade-in.visible .biz-loan-card:nth-child(1),
+.fade-in.visible .info-box:nth-child(1),
+.fade-in.visible .how-step:nth-child(1) { animation-delay: 0.05s; }
+
+.fade-in.visible .trust-number-card:nth-child(2),
+.fade-in.visible .trust-card:nth-child(2),
+.fade-in.visible .biz-loan-card:nth-child(2),
+.fade-in.visible .info-box:nth-child(2),
+.fade-in.visible .how-step:nth-child(2) { animation-delay: 0.15s; }
+
+.fade-in.visible .trust-number-card:nth-child(3),
+.fade-in.visible .trust-card:nth-child(3),
+.fade-in.visible .how-step:nth-child(3) { animation-delay: 0.25s; }
+
+.fade-in.visible .trust-number-card:nth-child(4) { animation-delay: 0.35s; }
+
+@keyframes stagger-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- 3. Hero Entrance Animation --- */
+.hero-content .hero-kicker,
+.hero-content .hero-title,
+.hero-content .hero-sub,
+.hero-content .hero-rail {
+  opacity: 0;
+  transform: translateY(18px);
+  animation: hero-reveal 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.hero-content .hero-kicker  { animation-delay: 0.1s; }
+.hero-content .hero-title   { animation-delay: 0.25s; }
+.hero-content .hero-sub     { animation-delay: 0.4s; }
+.hero-content .hero-rail    { animation-delay: 0.55s; }
+
+@keyframes hero-reveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hero stage cards entrance */
+.hero-stage-card {
+  opacity: 0;
+  animation: card-float-in 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.hero-stage-card-top    { animation-delay: 0.6s; }
+.hero-stage-card-bottom { animation-delay: 0.85s; }
+
+@keyframes card-float-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Hero figure entrance */
+.hero-figure {
+  opacity: 0;
+  animation: figure-rise 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.3s forwards;
+}
+
+@keyframes figure-rise {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* --- 4. Section Backgrounds — Visual Rhythm --- */
+.hero {
+  background: linear-gradient(180deg, #F0F5FF 0%, #FFFFFF 80%);
+}
+
+.trust-numbers {
+  background: #FFFFFF;
+  position: relative;
+}
+
+.trust-stats {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F0F5FF 50%, #FFFFFF 100%);
+}
+
+.biz-loan-section {
+  background: #FFFFFF;
+}
+
+.how-section {
+  background: #F8FAFC;
+}
+
+.testimonials-section {
+  background: #FFFFFF;
+}
+
+#faq {
+  background: #F8FAFC;
+}
+
+/* Section divider wave (hero → trust-numbers) */
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 40' preserveAspectRatio='none'%3E%3Cpath d='M0,20 C360,40 720,0 1080,20 C1260,30 1380,20 1440,20 L1440,40 L0,40 Z' fill='%23FFFFFF'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* --- 5. Card Hover Micro-interactions --- */
+.trust-card {
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.3s ease,
+              border-color 0.3s ease;
+}
+
+.trust-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 24px 48px rgba(49, 130, 246, 0.1);
+  border-color: rgba(49, 130, 246, 0.3);
+}
+
+.biz-loan-card {
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.3s ease,
+              border-color 0.3s ease;
+}
+
+.biz-loan-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
+  border-color: var(--toss-blue);
+}
+
+.info-box {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.info-box:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+}
+
+.how-step .step-circle {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.how-step:hover .step-circle {
+  transform: scale(1.08);
+  box-shadow: 0 8px 24px rgba(49, 130, 246, 0.15);
+}
+
+/* --- 6. Form Success Toast --- */
+.form-success-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 20px;
+  padding: 36px 48px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.16);
+  z-index: 100000;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--toss-gray-100);
+}
+
+.form-success-toast.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.form-success-toast .toast-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  background: linear-gradient(135deg, #1BC47D, #17a86c);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #fff;
+}
+
+.form-success-toast .toast-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--toss-black);
+  margin-bottom: 8px;
+}
+
+.form-success-toast .toast-desc {
+  font-size: 15px;
+  color: var(--toss-gray-500);
+  line-height: 1.5;
+}
+
+.form-success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 99999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.form-success-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* --- 7. Subtle Background Noise Texture (Global) --- */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99998;
+  opacity: 0.018;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px;
+  mix-blend-mode: multiply;
+}
+
+/* --- 8. Responsive Overrides for New Styles --- */
+@media (max-width: 768px) {
+  .hero-title,
+  .section-title,
+  .trust-section-title {
+    font-family: 'Black Han Sans', 'Pretendard Variable', sans-serif;
+  }
+
+  .hero::after {
+    height: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-success-toast {
+    width: 90%;
+    padding: 28px 24px;
+  }
+}
