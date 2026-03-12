@@ -729,11 +729,12 @@ ul {
 .trust-card {
   display: flex;
   flex-direction: column;
+  align-items: center;
   min-height: 100%;
   background: rgba(255, 255, 255, 0.55);
   border-radius: 28px;
   padding: 34px 30px 32px;
-  text-align: left;
+  text-align: center;
   border: 1px solid rgba(255, 255, 255, 0.72);
   transition: transform 0.28s ease, box-shadow 0.28s ease, background 0.28s ease;
 }
