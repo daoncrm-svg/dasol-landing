@@ -666,13 +666,20 @@
                 </div>
                 <form id="fixedBarForm" class="fixed-bar-form">
                     <input type="text" name="name" placeholder="이름" required>
-                    <input type="tel" name="phone" placeholder="연락처" required>
+                    <input type="tel" name="phone" value="010-" placeholder="연락처" required>
                     <select name="loanType" required>
-                        <option value="" disabled selected>대출상품 선택</option>
-                        <option value="아파트">아파트 담보대출</option>
-                        <option value="주택">주택 담보대출</option>
-                        <option value="추가">추가 담보대출</option>
-                        <option value="사업자">사업자 담보대출</option>
+                        <option value="" disabled selected>담보 유형 선택</option>
+                        <option value="아파트">아파트</option>
+                        <option value="주택">주택</option>
+                        <option value="오피스텔">오피스텔</option>
+                        <option value="빌라/다세대">빌라/다세대</option>
+                        <option value="토지">토지</option>
+                        <option value="상가">상가</option>
+                        <option value="공장">공장</option>
+                        <option value="주차장">주차장</option>
+                        <option value="임야">임야</option>
+                        <option value="산">산</option>
+                        <option value="기타">기타</option>
                     </select>
                     <button type="submit" class="fixed-bar-submit">상담신청</button>
                     <label class="fixed-bar-consent">
@@ -786,6 +793,15 @@
             </div>
         </footer>
 
+        <!-- Supabase JS -->
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script>
+            // Initialize Supabase Client
+            const SUPABASE_URL = 'https://afeocdpxhpmmspovabru.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmZW9jZHB4aHBtbXNwb3ZhYnJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MzAxNTcsImV4cCI6MjA4NzEwNjE1N30.Q6uq1v_xp1001TOdSSPhNbdggC2RGUDQdN5HWwvfMLY';
+            window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        </script>
+        
         <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
         <script src="assets/js/landing.js"></script>
 
@@ -797,17 +813,22 @@
                     <input type="text" name="name" placeholder="성함" required>
                 </div>
                 <div class="form-group">
-                    <input type="tel" name="phone" placeholder="전화번호" required>
+                    <input type="tel" name="phone" value="010-" placeholder="전화번호" required>
                 </div>
                 <div class="form-group">
                     <select name="propertyType" required>
                         <option value="" disabled selected>담보 유형 선택</option>
-                        <option value="APT">아파트</option>
-                        <option value="VILLA">빌라/다세대</option>
-                        <option value="HOUSE">단독주택</option>
-                        <option value="OFFICETEL">오피스텔</option>
-                        <option value="LAND">토지/임야</option>
-                        <option value="ETC">기타</option>
+                        <option value="아파트">아파트</option>
+                        <option value="주택">주택</option>
+                        <option value="오피스텔">오피스텔</option>
+                        <option value="빌라/다세대">빌라/다세대</option>
+                        <option value="토지">토지</option>
+                        <option value="상가">상가</option>
+                        <option value="공장">공장</option>
+                        <option value="주차장">주차장</option>
+                        <option value="임야">임야</option>
+                        <option value="산">산</option>
+                        <option value="기타">기타</option>
                     </select>
                 </div>
                 <div class="form-consent">

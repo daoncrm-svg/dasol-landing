@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavTracking();
   initSmoothScroll();
   initTrustNumbers();
-  injectSuccessToast();
+  injectResultToast();
 });
 
 /**
@@ -167,23 +167,33 @@ function initForms() {
     input.addEventListener('input', () => formatPhone(input));
   });
 
-  /** @type {string[]} */
-  const formIds = ['floatingForm', 'fullForm', 'fixedBarForm'];
-  formIds.forEach((/** @type {string} */ formId) => {
-    /** @type {HTMLFormElement | null} */
-    const form = document.getElementById(formId);
-    if (form) bindStandardForm(form);
+  document.querySelectorAll('form').forEach((/** @type {HTMLFormElement} */ form) => {
+    bindStandardForm(form);
   });
 }
 
 /**
+ * 클라이언트의 IP 주소를 비동기로 가져옵니다.
+ * @returns {Promise<string>}
+ */
+async function getClientIp() {
+  try {
+    const res = await fetch('https://api.ipify.org?format=json');
+    const data = await res.json();
+    return data.ip;
+  } catch (e) {
+    return 'IP fetch failed';
+  }
+}
+
+/**
  * 폼에 유효성 검증 및 제출 처리 로직을 바인딩합니다.
- * 성공 시 인라인 토스트 UI를 표시하고 CTA 카운터를 증가시킵니다.
+ * 성공 시 Supabase 리드 테이블에 입력 값을 Insert 하고 토스트 UI를 표시합니다.
  * @param {HTMLFormElement} form - 바인딩할 폼 요소
  * @returns {void}
  */
 function bindStandardForm(form) {
-  form.addEventListener('submit', (/** @type {SubmitEvent} */ event) => {
+  form.addEventListener('submit', async (/** @type {SubmitEvent} */ event) => {
     event.preventDefault();
 
     /** @type {HTMLInputElement | null} */
@@ -214,11 +224,76 @@ function bindStandardForm(form) {
       return;
     }
 
-    showSuccessToast();
-    if (window.incrementCtaCounter) window.incrementCtaCounter();
-    form.reset();
+    /** @type {HTMLButtonElement | null} */
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn ? submitBtn.innerText : '무료 상담 신청 ❯';
+    if (submitBtn) {
+      submitBtn.innerText = '신청 중...';
+      submitBtn.disabled = true;
+    }
+
+    showResultToast('loading', '신청 접수 중', '서버로 데이터를 안전하게 전송하고 있습니다.<br>잠시만 기다려주세요.');
+
+    try {
+      const ip = await getClientIp();
+      const typeText = typeSelect && typeSelect.selectedIndex >= 0 ? typeSelect.options[typeSelect.selectedIndex].text : '';
+      
+      const payload = {
+        name: nameInput ? nameInput.value.trim() : '',
+        phone: phoneInput ? phoneInput.value.trim() : '',
+        source: '이벤트페이지',
+        status: 'New',
+        inquiry_form: typeText,
+        created_at: new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().replace('Z', '+09:00')
+      };
+
+      const { error } = await window.supabaseClient.from('lead').insert([payload]);
+
+      // 웹훅 전송용 페이로드: n8n/Zapier 요구사항에 맞춰 Form 데이터로 변환 (각각의 변수로 폼 구성)
+      const formData = new FormData();
+      formData.append('name', payload.name);
+      formData.append('phone', payload.phone);
+      formData.append('source', payload.source);
+      formData.append('status', payload.status);
+      formData.append('inquiry_form', payload.inquiry_form);
+      formData.append('created_at', payload.created_at);
+      formData.append('sort', typeText);
+      formData.append('ip', ip);
+
+      // n8n / Zapier 등 외부 웹훅 전송 (에러가 나도 메인 로직에는 영향 없도록 catch 처리)
+      try {
+        const webhookUrl = 'https://daon1019.com/webhook/addscapcokr';
+        
+        // FormData를 사용하면 브라우저가 자동으로 multipart/form-data 헤더를 세팅하며 CORS Preflight도 발생하지 않음
+        await fetch(webhookUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: formData
+        });
+      } catch (webhookErr) {
+        console.error('Webhook Error:', webhookErr);
+      }
+
+      if (error) {
+        console.error('Supabase Insert Error:', error);
+        showResultToast('error', '접수 실패', '앗, 데이터베이스 연결 중 지연이 발생했습니다.<br>다시 한번 시도해 주시거나 전화 상담을 이용해주세요.');
+      } else {
+        showResultToast('success', '상담 신청 완료', '성공적으로 접수되었습니다.<br>담당 상담사가 확인 후 순차적으로 연락을 도와드리겠습니다.');
+        if (window.incrementCtaCounter) window.incrementCtaCounter();
+        form.reset();
+      }
+    } catch (err) {
+      console.error('Unexpected Form Submit Error:', err);
+      showResultToast('error', '예기치 않은 오류', '일시적인 서버 문제가 발생했습니다.<br>1533-9817로 연락주시면 바로 안내 도와드리겠습니다.');
+    } finally {
+      if (submitBtn) {
+        submitBtn.innerText = originalBtnText;
+        submitBtn.disabled = false;
+      }
+    }
   });
 }
+
 
 /**
  * 전화번호 문자열의 유효성(010/011/016/017/018/019 + 7~8자리)을 검증합니다.
@@ -235,13 +310,28 @@ function validatePhone(value) {
  * @returns {void}
  */
 function formatPhone(input) {
-  /** @type {string} */
-  let value = input.value.replace(/\D/g, '');
+  // 1) 사용자가 입력한 전체 문자열에서 숫자만 추출
+  let rawValue = input.value.replace(/\D/g, '');
 
-  if (value.length > 3 && value.length <= 7) {
-    value = `${value.slice(0, 3)}-${value.slice(3)}`;
-  } else if (value.length > 7) {
-    value = `${value.slice(0, 3)}-${value.slice(3, 7)}-${value.slice(7, 11)}`;
+  // 2) 010 패턴 강제화 (첫 3자리가 '010'이 아니면 무조건 '010' 먼저 씌움)
+  if (!rawValue.startsWith('010')) {
+    rawValue = '010' + rawValue;
+  }
+
+  // 3) 앞의 '010' 3자리를 제외한 실질적인 입력 '나머지 숫자' 추출
+  let restValue = rawValue.substring(3);
+
+  /** @type {string} */
+  let value = '010';
+
+  // 4) 길이에 따른 하이픈(-) 포맷팅 완성 (0~4자리, 5~8자리) - 010 제외하고 최대 8자리
+  if (restValue.length > 0 && restValue.length <= 4) {
+    value += `-${restValue}`;
+  } else if (restValue.length > 4) {
+    // 최대 8자리까지만 자름
+    value += `-${restValue.slice(0, 4)}-${restValue.slice(4, 8)}`;
+  } else {
+    value += `-`; // 숫자가 없으면 기본 010- 유지
   }
 
   input.value = value;
@@ -568,59 +658,117 @@ function initTrustNumbers() {
 }
 
 /**
- * 폼 제출 성공 시 표시할 토스트 UI(오버레이 + 카드)를 DOM에 주입합니다.
- * 페이지 로드 시 1회만 실행되며, 이미 존재하면 중복 생성하지 않습니다.
+ * 폼 제출 결과를 표시할 범용 토스트/안내창 UI를 DOM에 주입합니다.
  * @returns {void}
  */
-function injectSuccessToast() {
-  if (document.querySelector('.form-success-overlay')) return;
+function injectResultToast() {
+  if (document.querySelector('.form-result-overlay')) return;
 
   /** @type {HTMLDivElement} */
   const overlay = document.createElement('div');
-  overlay.className = 'form-success-overlay';
-  overlay.addEventListener('click', hideSuccessToast);
+  overlay.className = 'form-result-overlay';
+  overlay.addEventListener('click', (e) => {
+    // 팝업 회색 배경 클릭 시 팝업 닫기 (단, 로딩 중에는 닫히지 않음)
+    if (e.target === overlay && !overlay.classList.contains('is-loading')) {
+      hideResultToast();
+    }
+  });
 
   /** @type {HTMLDivElement} */
   const toast = document.createElement('div');
-  toast.className = 'form-success-toast';
+  toast.className = 'form-result-toast';
   toast.innerHTML = `
-    <div class="toast-icon">✓</div>
-    <div class="toast-title">상담 신청이 접수되었습니다</div>
-    <div class="toast-desc">담당 상담사가 순차적으로 연락드리겠습니다.<br>잠시만 기다려주세요.</div>
+    <div class="toast-icon" data-type="loading"></div>
+    <div class="toast-title">처리 중</div>
+    <div class="toast-desc">잠시만 기다려주세요.</div>
+    <button type="button" class="toast-close-btn" style="display: none;" onclick="hideResultToast()">확인</button>
   `;
 
+  overlay.appendChild(toast);
   document.body.appendChild(overlay);
-  document.body.appendChild(toast);
 }
 
 /**
- * 성공 토스트 UI를 화면에 표시합니다.
- * 3초 후 자동으로 닫힙니다.
+ * 전역 타이머 관리용 변수 (자동 팝업 닫기 타임아웃)
+ * @type {number | null}
+ */
+let resultToastTimer = null;
+
+/**
+ * 폼 제출 결과 안내창(토스트)을 화면에 띄웁니다.
+ *
+ * @param {'success'|'error'|'loading'} type - 아이콘 및 상태 타입
+ * @param {string} title - 큰 제목 텍스트
+ * @param {string} desc - 메인 안내 문구
  * @returns {void}
  */
-function showSuccessToast() {
+function showResultToast(type, title, desc) {
   /** @type {HTMLElement | null} */
-  const overlay = document.querySelector('.form-success-overlay');
+  const overlay = document.querySelector('.form-result-overlay');
+  if (!overlay) return;
+
+  if (resultToastTimer) {
+    clearTimeout(resultToastTimer);
+    resultToastTimer = null;
+  }
+
+  // 로딩 상태 제어 (로딩중에는 바깥 클릭을 막기 위함)
+  if (type === 'loading') {
+    overlay.classList.add('is-loading');
+  } else {
+    overlay.classList.remove('is-loading');
+  }
+
   /** @type {HTMLElement | null} */
-  const toast = document.querySelector('.form-success-toast');
-  if (!overlay || !toast) return;
+  const iconEl = overlay.querySelector('.toast-icon');
+  /** @type {HTMLElement | null} */
+  const titleEl = overlay.querySelector('.toast-title');
+  /** @type {HTMLElement | null} */
+  const descEl = overlay.querySelector('.toast-desc');
+  /** @type {HTMLElement | null} */
+  const btnEl = overlay.querySelector('.toast-close-btn');
+
+  if (iconEl) {
+    iconEl.setAttribute('data-type', type);
+    if (type === 'success') iconEl.innerHTML = '✓';
+    else if (type === 'error') iconEl.innerHTML = '!';
+    else iconEl.innerHTML = '↻'; // loading fallback
+  }
+
+  if (titleEl) titleEl.innerHTML = title;
+  if (descEl) descEl.innerHTML = desc;
+
+  if (btnEl) {
+    // 성공 혹은 에러 시 확인 버튼을 표시
+    if (type === 'success' || type === 'error') {
+      btnEl.style.display = 'block';
+    } else {
+      btnEl.style.display = 'none';
+    }
+  }
 
   overlay.classList.add('show');
-  toast.classList.add('show');
 
-  setTimeout(() => hideSuccessToast(), 3000);
+  // 성공 상태일 때는 5초 후 자동으로 닫히도록 설정
+  if (type === 'success') {
+    resultToastTimer = setTimeout(() => {
+      hideResultToast();
+    }, 5000);
+  }
 }
 
 /**
- * 성공 토스트 UI를 숨깁니다.
- * 오버레이 클릭이나 자동 타이머에 의해 호출됩니다.
+ * 폼 안내창 UI를 숨깁니다.
  * @returns {void}
  */
-function hideSuccessToast() {
+function hideResultToast() {
   /** @type {HTMLElement | null} */
-  const overlay = document.querySelector('.form-success-overlay');
-  /** @type {HTMLElement | null} */
-  const toast = document.querySelector('.form-success-toast');
-  if (overlay) overlay.classList.remove('show');
-  if (toast) toast.classList.remove('show');
+  const overlay = document.querySelector('.form-result-overlay');
+  if (overlay) {
+    overlay.classList.remove('show');
+  }
+  if (resultToastTimer) {
+    clearTimeout(resultToastTimer);
+    resultToastTimer = null;
+  }
 }
