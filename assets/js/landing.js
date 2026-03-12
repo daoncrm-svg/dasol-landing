@@ -284,7 +284,7 @@ function bindStandardForm(form) {
       }
     } catch (err) {
       console.error('Unexpected Form Submit Error:', err);
-      showResultToast('error', '예기치 않은 오류', '일시적인 서버 문제가 발생했습니다.<br>1533-9817로 연락주시면 바로 안내 도와드리겠습니다.');
+      showResultToast('error', '예기치 않은 오류', '일시적인 서버 문제가 발생했습니다.<br>1866-1019로 연락주시면 바로 안내 도와드리겠습니다.');
     } finally {
       if (submitBtn) {
         submitBtn.innerText = originalBtnText;
@@ -496,24 +496,41 @@ function initCtaRollers() {
 
   /** @type {HTMLElement | null} */
   const countEl = document.getElementById('ctaCount');
-  if (countEl) {
+  /** @type {HTMLElement | null} */
+  const trustApprovalEl = document.getElementById('trustApprovalCount');
+
+  if (countEl || trustApprovalEl) {
     /** @type {number} */
     const base = 14600;
     /** @type {number} */
     const variation = Math.floor(Math.random() * 50);
     /** @type {number} */
     let currentCount = base + variation;
-    countEl.textContent = currentCount.toLocaleString();
+    
+    const countText = currentCount.toLocaleString();
+    if (countEl) countEl.textContent = countText;
+    if (trustApprovalEl) trustApprovalEl.textContent = countText;
 
     /**
      * 카운터 값이 변경될 때 스케일 애니메이션을 재생합니다.
      * @returns {void}
      */
     const animateCount = () => {
-      countEl.style.transition = 'transform 0.3s ease';
-      countEl.style.transform = 'scale(1.05)';
+      const scaleUp = 'scale(1.05)';
+      const scaleNormal = 'scale(1)';
+
+      if (countEl) {
+        countEl.style.transition = 'transform 0.3s ease';
+        countEl.style.transform = scaleUp;
+      }
+      if (trustApprovalEl) {
+        trustApprovalEl.style.transition = 'transform 0.3s ease';
+        trustApprovalEl.style.transform = scaleUp;
+      }
+      
       setTimeout(() => {
-        countEl.style.transform = 'scale(1)';
+        if (countEl) countEl.style.transform = scaleNormal;
+        if (trustApprovalEl) trustApprovalEl.style.transform = scaleNormal;
       }, 300);
     };
 
@@ -524,7 +541,9 @@ function initCtaRollers() {
      */
     window.incrementCtaCounter = () => {
       currentCount += 1;
-      countEl.textContent = currentCount.toLocaleString();
+      const newText = currentCount.toLocaleString();
+      if (countEl) countEl.textContent = newText;
+      if (trustApprovalEl) trustApprovalEl.textContent = newText;
       animateCount();
     };
 
@@ -596,8 +615,11 @@ function initTrustNumbers() {
    * @returns {void}
    */
   const animateCounter = (element) => {
+    const targetVal = element.dataset.target;
+    if (!targetVal) return; // data-target이 없으면(예: 동기화 요소) 조기 종료
+
     /** @type {number} */
-    const target = parseFloat(element.dataset.target);
+    const target = parseFloat(targetVal);
     /** @type {number} */
     const decimal = parseInt(element.dataset.decimal || '0', 10);
     /** @type {number} */
