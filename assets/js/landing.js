@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSmoothScroll();
   initTrustNumbers();
   injectResultToast();
+  initHamburger();
 });
 
 /**
@@ -280,6 +281,22 @@ function bindStandardForm(form) {
       } else {
         showResultToast('success', '상담 신청 완료', '성공적으로 접수되었습니다.<br>담당 상담사가 확인 후 순차적으로 연락을 도와드리겠습니다.');
         if (window.incrementCtaCounter) window.incrementCtaCounter();
+
+        // Google Ads / GA4 전환 이벤트 (dataLayer)
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: 'form_submission_success',
+          form_name: form.id || 'inquiry',
+          lead_type: typeText,
+          lead_name: payload.name,
+          lead_phone_masked: payload.phone.replace(/\d{4}$/, '****')
+        });
+
+        // Google Ads 클릭 전환 측정
+        if (typeof gtag_report_conversion === 'function') {
+          gtag_report_conversion();
+        }
+
         form.reset();
       }
     } catch (err) {
@@ -793,4 +810,72 @@ function hideResultToast() {
     clearTimeout(resultToastTimer);
     resultToastTimer = null;
   }
+}
+
+/**
+ * 모바일 햄버거 메뉴 토글 기능을 초기화합니다.
+ * 햄버거 버튼 클릭 시 사이드 메뉴 슬라이드인/아웃, 오버레이, body 스크롤 잠금을 제어합니다.
+ * @returns {void}
+ */
+function initHamburger() {
+  /** @type {HTMLButtonElement | null} */
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  /** @type {HTMLElement | null} */
+  const nav = document.getElementById('mainNav');
+  /** @type {HTMLElement | null} */
+  const overlay = document.getElementById('navOverlay');
+
+  if (!hamburgerBtn || !nav) return;
+
+  /**
+   * 모바일 메뉴를 토글합니다 (열기/닫기).
+   * @returns {void}
+   */
+  const toggleMenu = () => {
+    /** @type {boolean} */
+    const isOpen = nav.classList.toggle('open');
+    hamburgerBtn.classList.toggle('active', isOpen);
+    hamburgerBtn.setAttribute('aria-expanded', String(isOpen));
+    hamburgerBtn.setAttribute('aria-label', isOpen ? '메뉴 닫기' : '메뉴 열기');
+
+    if (overlay) {
+      overlay.classList.toggle('active', isOpen);
+    }
+
+    // body 스크롤 잠금/해제
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  };
+
+  /**
+   * 모바일 메뉴를 닫습니다.
+   * @returns {void}
+   */
+  const closeMenu = () => {
+    nav.classList.remove('open');
+    hamburgerBtn.classList.remove('active');
+    hamburgerBtn.setAttribute('aria-expanded', 'false');
+    hamburgerBtn.setAttribute('aria-label', '메뉴 열기');
+    if (overlay) overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  };
+
+  // 햄버거 버튼 클릭
+  hamburgerBtn.addEventListener('click', toggleMenu);
+
+  // 오버레이 클릭 시 닫기
+  if (overlay) {
+    overlay.addEventListener('click', closeMenu);
+  }
+
+  // 네비게이션 링크 클릭 시 자동으로 메뉴 닫기
+  nav.querySelectorAll('.nav-link').forEach((/** @type {HTMLAnchorElement} */ link) => {
+    link.addEventListener('click', closeMenu);
+  });
+
+  // 창 크기 변경 시 데스크톱으로 돌아오면 메뉴 상태 초기화
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+      closeMenu();
+    }
+  });
 }
