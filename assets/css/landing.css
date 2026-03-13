@@ -1820,7 +1820,7 @@ ul {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 32px 16px; /* Row gap 32px, Column gap 16px */
+  gap: 64px; /* 데스크탑 화면에서 간격 확보하되 화면 끝까지 찢어지지 않음 */
   margin-top: 32px;
 }
 
@@ -1829,8 +1829,8 @@ ul {
   background: transparent;
   border: none;
   text-align: center;
-  flex: 1 1 150px; /* 창 폭에 맞춰 최소 150px를 확보하며, 불가능시 아랫줄로 넘김 */
-  min-width: 140px; /* 무슨 일이 있어도 박스가 140px보다 찌그러지지 않도록 방어 */
+  flex: 0 1 auto; /* 데스크탑 공간만큼 팽창 방지, 컨텐츠 크기만큼만 스택 */
+  min-width: 140px; /* 모바일 강제 압축에 대한 최소 방어 유지 */
   max-width: 250px;
 }
 
