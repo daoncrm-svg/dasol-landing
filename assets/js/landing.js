@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTrustNumbers();
   injectResultToast();
   initHamburger();
+  initConsentAll();
 });
 
 /**
@@ -877,5 +878,28 @@ function initHamburger() {
     if (window.innerWidth > 768) {
       closeMenu();
     }
+  });
+}
+
+/**
+ * @description 전체 동의 체크박스 토글 로직
+ */
+function initConsentAll() {
+  const allCheck = document.getElementById('consentAllCheck');
+  if (!allCheck) return;
+
+  const consentArea = allCheck.closest('.cta-inline-consent');
+  if (!consentArea) return;
+
+  const childBoxes = consentArea.querySelectorAll('.consent-detail-list input[type="checkbox"]');
+
+  allCheck.addEventListener('change', () => {
+    childBoxes.forEach(cb => { cb.checked = allCheck.checked; });
+  });
+
+  childBoxes.forEach(cb => {
+    cb.addEventListener('change', () => {
+      allCheck.checked = [...childBoxes].every(c => c.checked);
+    });
   });
 }

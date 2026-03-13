@@ -728,10 +728,28 @@
                         <button type="submit" class="cta-inline-submit">무료 상담 신청 ❯</button>
                     </div>
                     <div class="cta-inline-consent">
-                        <label>
-                            <input type="checkbox" name="consentAll" checked>
-                            <span>개인정보 수집·이용, 제3자 제공, 마케팅 수신에 모두 동의합니다</span>
+                        <label class="consent-all-label">
+                            <input type="checkbox" id="consentAllCheck" name="consentAll">
+                            <span><strong>전체 동의</strong></span>
                         </label>
+                        <div class="consent-detail-list">
+                            <label>
+                                <input type="checkbox" name="consentPrivacy" required checked>
+                                <span>[필수] 개인정보 수집·이용 동의</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" name="consentThirdParty" required checked>
+                                <span>[필수] 개인정보 제3자 제공 동의</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" name="consentMarketing">
+                                <span>[선택] 마케팅 정보 수신 동의</span>
+                            </label>
+                        </div>
+                        <p class="consent-detail-info">
+                            수집항목: 이름, 연락처, 담보유형 | 목적: 대출상담 및 금융상품 안내 | 보유: 3년<br>
+                            <a href="privacy.html" target="_blank" class="privacy-link">개인정보처리방침 전문 보기</a>
+                        </p>
                         <span class="cta-inline-safe">🔒 신용점수 영향 없음</span>
                     </div>
                 </form>
@@ -773,9 +791,14 @@
                 </div>
                 <div class="mf-bottom-row">
                     <label class="mf-consent">
-                        <input type="checkbox" name="consent" checked>
-                        <span>개인정보 동의</span>
+                        <input type="checkbox" name="consentPrivacy" required checked>
+                        <span>[필수] 수집·이용 동의</span>
                     </label>
+                    <label class="mf-consent">
+                        <input type="checkbox" name="consentThirdParty" required checked>
+                        <span>[필수] 제3자 제공 동의</span>
+                    </label>
+                    <a href="privacy.html" target="_blank" class="mf-privacy-link">전문보기</a>
                     <button type="submit" class="mf-submit">무료 상담 신청</button>
                 </div>
             </form>
@@ -808,9 +831,14 @@
                     </select>
                     <button type="submit" class="fixed-bar-submit">상담신청</button>
                     <label class="fixed-bar-consent">
-                        <input type="checkbox" name="consent" required checked>
-                        <span>개인정보수집 동의</span>
+                        <input type="checkbox" name="consentPrivacy" required checked>
+                        <span>[필수] 개인정보 수집·이용 동의</span>
                     </label>
+                    <label class="fixed-bar-consent">
+                        <input type="checkbox" name="consentThirdParty" required checked>
+                        <span>[필수] 제3자 제공 동의</span>
+                    </label>
+                    <a href="privacy.html" target="_blank" class="fixed-bar-privacy-link">전문보기</a>
                 </form>
             </div>
         </div>
@@ -889,6 +917,7 @@
             <div class="container">
                 <div class="footer-inner footer-redesign">
                     <span class="footer-badge">전화권유판매 임직원 명부</span>
+                    <a href="privacy.html" target="_blank" class="footer-badge footer-privacy-badge">개인정보처리방침</a>
                     <div class="footer-info-grid">
                         <div class="footer-info-left">
                             <p>상호명 : 다솔 대부중개</p>
@@ -958,9 +987,16 @@
                 </div>
                 <div class="form-consent">
                     <label class="checkbox-label">
-                        <input type="checkbox" name="consent" required checked>
-                        <span class="checkbox-text">개인정보 수집 및 이용 동의</span>
+                        <input type="checkbox" name="consentPrivacy" required checked>
+                        <span class="checkbox-text">[필수] 개인정보 수집·이용 동의</span>
                     </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="consentThirdParty" required checked>
+                        <span class="checkbox-text">[필수] 제3자 제공 동의</span>
+                    </label>
+                    <p class="form-consent-info">수집: 이름, 연락처, 담보유형 | 목적: 대출상담 | 보유: 3년
+                        <a href="privacy.html" target="_blank">전문보기</a>
+                    </p>
                 </div>
                 <button type="submit" class="btn-hero-form">지금 한도 담판짓기</button>
                 <p class="form-notice">실시간 금융사 금리 비교 반영</p>
