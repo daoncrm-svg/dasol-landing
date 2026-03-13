@@ -1880,36 +1880,42 @@ ul {
     padding: 56px 0;
   }
 
-  /* 모바일(iPhone SE 375px 이하 포함) 2단 배열로 앱 느낌의 UI 제공 */
+  /* 다시 가독성을 확보하기 위해 상하 2열 배치 혹은 여백 확보 */
   .trust-numbers-grid {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px;
+    gap: 16px 8px; /* 위아래 간격 16, 좌우 간격 8 */
   }
 
   .trust-number-card {
-    display: block;
-    padding: 24px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 8px;
     text-align: center;
+    gap: 4px;
   }
 
   .trust-number-value {
     font-size: 26px;
-    display: inline-block;
+    line-height: 1.2;
+    display: block;
   }
 
   .trust-number-unit {
-    font-size: 13px;
-    display: inline-block;
+    font-size: 14px;
+    display: block;
+    margin-top: -2px;
   }
 
   .trust-number-label {
     display: block;
-    margin-top: 6px;
-    font-size: 11px;
+    margin-top: 8px;
+    font-size: 13px;
     color: var(--toss-gray-500);
     word-break: keep-all;
-    white-space: nowrap;
+    white-space: pre-wrap; /* 필요하면 줄바꿈 허용 */
   }
 }
 
