@@ -20,10 +20,8 @@
     <meta name="twitter:description" content="주택담보대출·아파트담보대출·부동산담보대출 최저금리 비교. DSR규제 없는 담보대출, 대환대출, 후순위·선순위 대환까지 무료 상담.">
     <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="assets/img/logo.png" type="image/png">
-    <!-- Production domain is not defined in this repository.
-         Do not guess canonical, og:url, or absolute og:image values. -->
-    <!-- Organization/WebSite JSON-LD is intentionally deferred until the production URL
-         and public business identity are confirmed to match. -->
+    <link rel="canonical" href="https://dasol-landing.vercel.app/">
+    <meta property="og:url" content="https://dasol-landing.vercel.app/">
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -133,13 +131,17 @@
             <a href="#hero" class="logo" aria-label="다솔대부중개">
                 <img src="assets/img/logo.png" alt="다솔 부동산 담보대출 비교상담" height="40">
             </a>
+            <div class="lp-logo-info">
+                <span class="lp-logo-slogan">다솔은 '<em>다 솔</em>'루션이 있다.</span>
+                <span class="lp-logo-reg">대부업등록 2025-경기안양-0007</span>
+            </div>
             <nav class="nav" id="mainNav" aria-label="주요 메뉴">
                 <ul class="nav-list">
                     <li><a href="#hero" class="nav-link active">홈</a></li>
-                    <li><a href="#products" class="nav-link">주택담보대출</a></li>
-                    <li><a href="#info" class="nav-link">조건안내</a></li>
-                    <li><a href="#step" class="nav-link">진행절차</a></li>
-                    <li><a href="#simulator" class="nav-link">한도계산</a></li>
+                    <li><a href="mortgage.html" class="nav-link">부동산담보대출</a></li>
+                    <li><a href="apartment.html" class="nav-link">아파트</a></li>
+                    <li><a href="refinance.html" class="nav-link">대환/후순위</a></li>
+                    <li><a href="business.html" class="nav-link">사업자</a></li>
                     <li><a href="#finalCTA" class="nav-link">상담신청</a></li>
                 </ul>
                 <a href="tel:1866-1019" class="nav-mobile-phone">📞 1866-1019</a>
@@ -200,6 +202,11 @@
                         <span class="hero-rail-item">추가 자금 상담</span>
                     </div>
                     <a href="#finalCTA" class="hero-cta-btn">지금 무료 상담 신청 →</a>
+                    <div class="hero-trust-badges">
+                        <span class="hero-trust-badge">✅ 대부업등록 2025-경기안양-0007</span>
+                        <span class="hero-trust-badge">💰 상담·수수료 100% 무료</span>
+                        <span class="hero-trust-badge">🔒 신용점수 영향 없음</span>
+                    </div>
                 </div>
             </div>
         </section>
@@ -753,6 +760,11 @@
                         <span class="cta-inline-safe">🔒 신용점수 영향 없음</span>
                     </div>
                 </form>
+                <div class="cta-trust-strip">
+                    <span>✅ 대부업등록번호 : 2025-경기안양-0007 (중개)</span>
+                    <span>📍 경기도 안양시 동안구 엘에스로 76, 가동 239호</span>
+                    <span>📞 대표번호 : <a href="tel:1866-1019">1866-1019</a></span>
+                </div>
             </div>
         </section>
 
@@ -1006,6 +1018,27 @@
                 </div>
             </form>
         </div>
+
+        <!-- ===== 보이스피싱 경고 팝업 ===== -->
+        <div class="fraud-popup" id="fraudPopup">
+            <div class="fraud-blue-wrapper">
+                <div class="fraud-white-card">
+                    <p class="fraud-txt-1">대출 진행을 미끼로 한 <strong>선입금 요구는 100% 사기</strong>입니다.</p>
+                    <p class="fraud-txt-2">어떠한 금융기관도<br>대출 심사나 한도 상향을 이유로 고객님께<br><span class="yellow-line">절대 먼저 금전을 요구하지 않습니다.</span></p>
+                    <p class="fraud-txt-3">수수료 입금, 출처 불분명한 앱 설치, 신분증 사진 전송을 요구받았다면 즉시 거래를 중단하고 <strong>경찰청(112)</strong>에 신고해 주세요.</p>
+                    <p class="fraud-txt-4">안전한 금융 생활을 위해 항상 각별한 주의를 당부드립니다.</p>
+                    <div class="fraud-brand">다솔대부중개</div>
+                </div>
+            </div>
+            <div class="fraud-bottom-bar">
+                <label class="fraud-hide-label">
+                    <input type="checkbox" id="fraudPopupHide">
+                    <span>하루 동안 그만보기</span>
+                </label>
+                <button class="fraud-close-btn" id="fraudPopupClose">닫기</button>
+            </div>
+        </div>
+
 </body>
 
 </html>

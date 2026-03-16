@@ -4687,4 +4687,527 @@ body::after {
   color: #8B95A1;
   margin-top: 4px;
   line-height: 1.5;
+}
+
+/* ===== FLOATING FORM CONSENT ===== */
+.floating-form-card .form-consent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 10px 0;
+  border-top: 1px solid #f2f4f6;
+}
+
+.floating-form-card .checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.floating-form-card .checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #3182F6;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.floating-form-card .checkbox-text {
+  font-size: 12px;
+  color: #4E5968;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.floating-form-card .form-consent-info {
+  width: 100%;
+  font-size: 10px;
+  color: #8B95A1;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.floating-form-card .form-consent-info a {
+  color: #3182F6;
+  font-size: 10px;
+}
+
+/* ===== FRAUD WARNING POPUP ===== */
+.fraud-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 99999;
+  width: 90%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 50px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  animation: popupFadeIn 0.3s ease;
+  overflow: hidden;
+  border: 1px solid #e5e8eb;
+}
+
+.fraud-popup.hidden {
+  display: none;
+}
+
+@keyframes popupFadeIn {
+  from { opacity: 0; transform: translate(-50%, -45%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+.fraud-blue-wrapper {
+  background: #3182F6;
+  padding: 16px 16px 0 16px;
+}
+
+.fraud-white-card {
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.fraud-txt-1 {
+  font-size: 14px;
+  color: #4E5968;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  word-break: keep-all;
+}
+
+.fraud-txt-2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #191F28;
+  line-height: 1.4;
+  margin-bottom: 24px;
+  word-break: keep-all;
+}
+
+.yellow-line {
+  display: inline-block;
+  box-shadow: inset 0 -12px 0 rgba(255, 214, 0, 0.4);
+}
+
+.fraud-txt-3 {
+  font-size: 13px;
+  color: #8B95A1;
+  line-height: 1.5;
+  margin-bottom: 24px;
+  word-break: keep-all;
+}
+
+.fraud-txt-4 {
+  font-size: 13px;
+  color: #4E5968;
+  line-height: 1.5;
+  margin-bottom: 40px;
+  word-break: keep-all;
+}
+
+.fraud-brand {
+  font-size: 16px;
+  font-weight: 800;
+  color: #3182F6;
+}
+
+.fraud-bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 20px;
+  background: #fff;
+}
+
+.fraud-hide-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  margin-right: 16px;
+}
+
+.fraud-hide-label input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: #3182F6;
+}
+
+.fraud-hide-label::after {
+  content: "";
+  display: block;
+  width: 1px;
+  height: 12px;
+  background: #e5e8eb;
+  margin-left: 16px;
+}
+
+.fraud-close-btn {
+  background: transparent;
+  color: #333;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+
+@media (max-width: 480px) {
+  .fraud-txt-1 { font-size: 13px; }
+  .fraud-txt-2 { font-size: 16px; }
+  .fraud-white-card { padding: 32px 20px; }
+}
+
+/* ===== Hero Trust Badges ===== */
+.hero-trust-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 16px;
+}
+.hero-trust-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  background: rgba(49, 130, 246, 0.08);
+  border: 1px solid rgba(49, 130, 246, 0.15);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--toss-gray-700);
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .hero-trust-badges {
+    gap: 6px;
+  }
+  .hero-trust-badge {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+}
+
+/* ===== CTA Trust Strip (폼 아래 사업자 정보) ===== */
+.cta-trust-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 14px 20px;
+  background: var(--toss-gray-50);
+  border-radius: 12px;
+  border: 1px solid var(--toss-gray-100);
+}
+.cta-trust-strip span {
+  font-size: 12px;
+  color: var(--toss-gray-500);
+  white-space: nowrap;
+}
+.cta-trust-strip a {
+  color: var(--toss-blue);
+  text-decoration: none;
+  font-weight: 600;
+}
+@media (max-width: 640px) {
+  .cta-trust-strip {
+    gap: 6px;
+    padding: 12px 16px;
+    flex-direction: column;
+    align-items: center;
+  }
+  .cta-trust-strip span {
+    font-size: 11px;
+  }
+}
+
+/* ==========================================================================
+   LP 헤더 로고 옆 브랜딩 텍스트
+   ========================================================================== */
+.lp-logo-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-left: 14px;
+    padding-left: 14px;
+    border-left: 2px solid rgba(49, 130, 246, .25);
+}
+.lp-logo-slogan {
+    font-size: 12px;
+    font-weight: 600;
+    color: #222;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+}
+.lp-logo-slogan em {
+    font-style: normal;
+    color: #3182F6;
+    font-weight: 800;
+}
+.lp-logo-reg {
+    font-size: 10px;
+    color: #888;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .lp-logo-info {
+        display: none;
+    }
+}
+
+/* ==========================================================================
+   LP 전용 히어로 (담픽 스타일 — 블루 그라디언트 + 해시태그 배지 + 스펙 테이블)
+   ========================================================================== */
+
+/* --- LP Hero Section --- */
+.lp-hero {
+  position: relative;
+  background: linear-gradient(135deg, #0052a5 30%, #1a8cef 100%);
+  padding: 120px 0 56px;
+  overflow: hidden;
+}
+.lp-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.lp-hero::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0; right: 0;
+  height: 40px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 40' preserveAspectRatio='none'%3E%3Cpath d='M0,20 C360,40 720,0 1080,20 C1260,30 1380,20 1440,20 L1440,40 L0,40 Z' fill='%23FFFFFF'/%3E%3C/svg%3E") no-repeat center / 100% 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.lp-hero-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* LP Hero Title */
+.lp-hero-title {
+  font-family: 'IBM Plex Sans KR', 'Pretendard Variable', sans-serif;
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin: 0 0 16px;
+}
+
+/* LP Hero Subtitle */
+.lp-hero-subtitle {
+  font-size: clamp(15px, 2vw, 18px);
+  color: rgba(255,255,255,0.9);
+  line-height: 1.6;
+  margin: 0 0 24px;
+  font-weight: 400;
+}
+
+/* LP Hero Tags (해시태그 배지) */
+.lp-hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 20px;
+}
+
+.lp-hero-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 16px;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition: background 0.2s, transform 0.2s;
+}
+.lp-hero-tag:hover {
+  background: rgba(255,255,255,0.28);
+  transform: translateY(-1px);
+}
+
+/* LP Hero Trust Badges (등록번호 등) */
+.lp-hero-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-top: 8px;
+}
+.lp-hero-trust-item {
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  font-weight: 500;
+}
+
+/* --- LP Spec Table (상품 상세 조건) --- */
+.lp-spec {
+  background: #fff;
+  padding: 56px 0;
+}
+
+.lp-spec-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.lp-spec-header h2 {
+  font-family: 'IBM Plex Sans KR', 'Pretendard Variable', sans-serif;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 700;
+  color: #191F28;
+  margin: 0 0 8px;
+}
+.lp-spec-header p {
+  font-size: 15px;
+  color: #8B95A1;
+  margin: 0;
+}
+
+.lp-spec-table {
+  max-width: 820px;
+  margin: 0 auto;
+  border-top: 2px solid #191F28;
+}
+
+.lp-spec-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  border-bottom: 1px solid #E5E8EB;
+  min-height: 56px;
+}
+
+.lp-spec-label {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  background: #F8FAFC;
+  font-size: 14px;
+  font-weight: 700;
+  color: #333D4B;
+  border-right: 1px solid #E5E8EB;
+}
+
+.lp-spec-value {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  font-size: 14px;
+  color: #4E5968;
+  line-height: 1.6;
+}
+.lp-spec-value strong {
+  color: #191F28;
+  font-weight: 700;
+}
+.lp-spec-value .spec-highlight {
+  color: var(--toss-blue, #3182F6);
+  font-weight: 700;
+}
+
+/* LP Spec CTA Button */
+.lp-spec-cta {
+  text-align: center;
+  margin-top: 32px;
+}
+.lp-spec-cta a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 36px;
+  background: var(--toss-blue, #3182F6);
+  color: #fff;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(49,130,246,0.25);
+}
+.lp-spec-cta a:hover {
+  background: #1b6ae8;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(49,130,246,0.35);
+}
+
+/* --- LP Hero Responsive --- */
+@media (max-width: 768px) {
+  .lp-hero {
+    padding: 100px 0 40px;
+  }
+  .lp-hero-title {
+    font-size: clamp(26px, 6vw, 36px);
+  }
+  .lp-hero-tag {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+  .lp-hero::after {
+    height: 24px;
+  }
+  .lp-spec-row {
+    grid-template-columns: 110px 1fr;
+  }
+  .lp-spec-label {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+  .lp-spec-value {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .lp-hero {
+    padding: 90px 0 32px;
+  }
+  .lp-hero-title {
+    font-size: 24px;
+  }
+  .lp-hero-subtitle {
+    font-size: 14px;
+  }
+  .lp-hero-tags {
+    gap: 6px;
+  }
+  .lp-hero-tag {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+  .lp-spec-row {
+    grid-template-columns: 90px 1fr;
+  }
+  .lp-spec-label {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .lp-spec-value {
+    padding: 10px 14px;
+    font-size: 12px;
+  }
 }
