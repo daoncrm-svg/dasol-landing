@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const leadHandler = require('../api/lead.js');
 
 const root = path.resolve(__dirname, '..');
 const port = 4174;
@@ -20,6 +21,12 @@ const mimeTypes = {
 
 http.createServer((req, res) => {
   const requestPath = decodeURIComponent((req.url || '/').split('?')[0]);
+
+  if (requestPath === '/api/lead') {
+    leadHandler(req, res);
+    return;
+  }
+
   const filePath = path.join(root, requestPath === '/' ? 'index.html' : requestPath.replace(/^\/+/, ''));
 
   if (!filePath.startsWith(root)) {

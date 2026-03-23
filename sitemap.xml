@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- 메인 브랜드 허브 -->
+  <url>
+    <loc>https://dasol-landing.vercel.app/</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <!-- 부동산 담보대출 전용 LP -->
+  <url>
+    <loc>https://dasol-landing.vercel.app/mortgage.html</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- 아파트 담보대출 전용 LP -->
+  <url>
+    <loc>https://dasol-landing.vercel.app/apartment.html</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- 후순위/대환대출 전용 LP -->
+  <url>
+    <loc>https://dasol-landing.vercel.app/refinance.html</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- 사업자/비주거용 담보대출 전용 LP -->
+  <url>
+    <loc>https://dasol-landing.vercel.app/business.html</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- 개인정보처리방침 -->
+  <url>
+    <loc>https://dasol-landing.vercel.app/privacy.html</loc>
+    <lastmod>2026-03-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
+  </url>
+</urlset>
