@@ -103,6 +103,7 @@
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'AW-17385092218');
+      gtag('config', 'G-PRZPL1CPT3');
     </script>
 
     <!-- Google Ads 전환 추적: 폼 제출 시 호출 -->
@@ -755,7 +756,7 @@
                         </div>
                         <p class="consent-detail-info">
                             수집항목: 이름, 연락처, 담보유형 | 목적: 대출상담 및 금융상품 안내 | 보유: 3년<br>
-                            <a href="privacy.html" target="_blank" class="privacy-link">개인정보처리방침 전문 보기</a>
+                            <a href="privacy.html" target="_blank" rel="noopener noreferrer" class="privacy-link">개인정보처리방침 전문 보기</a>
                         </p>
                         <span class="cta-inline-safe">🔒 신용점수 영향 없음</span>
                     </div>
@@ -810,7 +811,7 @@
                         <input type="checkbox" name="consentThirdParty" required checked>
                         <span>[필수] 제3자 제공 동의</span>
                     </label>
-                    <a href="privacy.html" target="_blank" class="mf-privacy-link">전문보기</a>
+                    <a href="privacy.html" target="_blank" rel="noopener noreferrer" class="mf-privacy-link">전문보기</a>
                     <button type="submit" class="mf-submit">무료 상담 신청</button>
                 </div>
             </form>
@@ -850,7 +851,7 @@
                         <input type="checkbox" name="consentThirdParty" required checked>
                         <span>[필수] 제3자 제공 동의</span>
                     </label>
-                    <a href="privacy.html" target="_blank" class="fixed-bar-privacy-link">전문보기</a>
+                    <a href="privacy.html" target="_blank" rel="noopener noreferrer" class="fixed-bar-privacy-link">전문보기</a>
                 </form>
             </div>
         </div>
@@ -929,7 +930,7 @@
             <div class="container">
                 <div class="footer-inner footer-redesign">
                     <span class="footer-badge">전화권유판매 임직원 명부</span>
-                    <a href="privacy.html" target="_blank" class="footer-badge footer-privacy-badge">개인정보처리방침</a>
+                    <a href="privacy.html" target="_blank" rel="noopener noreferrer" class="footer-badge footer-privacy-badge">개인정보처리방침</a>
                     <div class="footer-info-grid">
                         <div class="footer-info-left">
                             <p>상호명 : 다솔 대부중개</p>
@@ -959,16 +960,8 @@
             </div>
         </footer>
 
-        <!-- Supabase JS -->
-        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-        <script>
-            // Initialize Supabase Client
-            const SUPABASE_URL = 'https://afeocdpxhpmmspovabru.supabase.co';
-            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmZW9jZHB4aHBtbXNwb3ZhYnJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MzAxNTcsImV4cCI6MjA4NzEwNjE1N30.Q6uq1v_xp1001TOdSSPhNbdggC2RGUDQdN5HWwvfMLY';
-            window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        </script>
-        
         <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+        <script src="assets/js/lead-utils.js"></script>
         <script src="assets/js/landing.js"></script>
 
         <!-- ===== FLOATING DB FORM ===== -->
@@ -1007,7 +1000,7 @@
                         <span class="checkbox-text">[필수] 제3자 제공 동의</span>
                     </label>
                     <p class="form-consent-info">수집: 이름, 연락처, 담보유형 | 목적: 대출상담 | 보유: 3년
-                        <a href="privacy.html" target="_blank">전문보기</a>
+                    <a href="privacy.html" target="_blank" rel="noopener noreferrer">전문보기</a>
                     </p>
                 </div>
                 <button type="submit" class="btn-hero-form">지금 한도 담판짓기</button>

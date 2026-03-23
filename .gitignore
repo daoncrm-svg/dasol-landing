@@ -4,6 +4,7 @@ Thumbs.db
 *.log
 .env
 .env.*
+.omx/
 __pycache__/
 
 # ===== Playwright / 테스트 스크린샷 (루트) =====

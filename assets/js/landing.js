@@ -5,6 +5,8 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  initAdTracking();
+  initPhoneClickTracking();
   initSwiper();
   initCtaRollers();
   initLoanSimulator();
@@ -19,7 +21,204 @@ document.addEventListener('DOMContentLoaded', () => {
   injectResultToast();
   initHamburger();
   initConsentAll();
+  initFraudPopup();
 });
+
+const LeadUtils = globalThis.LeadUtils;
+const COMPLETE_PAGE_PATH = 'complete.html';
+const GOOGLE_ADS_CONVERSION_ID = 'AW-17385092218/iTvsCP6yjOAbEPro7eFA';
+
+if (!LeadUtils) {
+  throw new Error('LeadUtils must be loaded before landing.js');
+}
+
+/* =========================================================
+ *  광고 식별자 + UTM + 유입 문맥 수집
+ *  - 페이지 접속 시 URL 파라미터를 sessionStorage에 저장
+ *  - 이미 저장된 값이 있으면 덮어쓰지 않음 (최초 클릭 보존)
+ * ========================================================= */
+
+/** @type {readonly string[]} 수집 대상 URL 파라미터 목록 */
+const AD_TRACKING_PARAMS = /** @type {const} */ ([
+  'gclid', 'gbraid', 'wbraid',
+  'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'
+]);
+
+/**
+ * 광고 식별자, UTM 파라미터, referrer, landing URL, 디바이스 유형을
+ * sessionStorage에 저장합니다.
+ * 이미 저장된 값이 있으면 덮어쓰지 않습니다(첫 클릭 보존 원칙).
+ * @returns {void}
+ */
+function initAdTracking() {
+  if (!sessionStorage.getItem('_lp_first_seen_at')) {
+    sessionStorage.setItem('_lp_first_seen_at', String(Date.now()));
+  }
+
+  // 이미 이번 세션에서 저장했으면 스킵
+  if (sessionStorage.getItem('_ad_tracked')) return;
+
+  const params = new URLSearchParams(window.location.search);
+  /** @type {Record<string, string>} */
+  const trackingData = {};
+
+  // 1) URL 파라미터 (gclid, gbraid, wbraid, utm_*)
+  for (const key of AD_TRACKING_PARAMS) {
+    const val = params.get(key);
+    if (val) trackingData[key] = val;
+  }
+
+  // 2) referrer
+  if (document.referrer) {
+    trackingData.referrer = document.referrer;
+  }
+
+  // 3) landing URL (쿼리스트링 포함 전체)
+  trackingData.landing_url = window.location.href;
+
+  // 4) device_type
+  trackingData.device_type = getDeviceType();
+
+  sessionStorage.setItem('_ad_tracking', JSON.stringify(trackingData));
+  sessionStorage.setItem('_ad_tracked', '1');
+}
+
+/**
+ * 사용자 디바이스 유형을 판별합니다.
+ * @returns {'mobile' | 'tablet' | 'desktop'}
+ */
+function getDeviceType() {
+  const ua = navigator.userAgent;
+  if (/Mobi|Android.*Mobile|iPhone|iPod/i.test(ua)) return 'mobile';
+  if (/Tablet|iPad|Android(?!.*Mobile)/i.test(ua)) return 'tablet';
+  return 'desktop';
+}
+
+/**
+ * sessionStorage에서 광고 추적 데이터를 읽어 반환합니다.
+ * @returns {Record<string, string>}
+ */
+function getAdTrackingData() {
+  try {
+    const raw = sessionStorage.getItem('_ad_tracking');
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function getSessionDurationMs() {
+  const firstSeenAt = Number(sessionStorage.getItem('_lp_first_seen_at'));
+
+  if (!Number.isFinite(firstSeenAt) || firstSeenAt <= 0) {
+    return null;
+  }
+
+  return Math.max(0, Date.now() - firstSeenAt);
+}
+
+function initPhoneClickTracking() {
+  document.querySelectorAll('a[href^="tel:"]').forEach((link) => {
+    link.addEventListener('click', () => {
+      const adData = getAdTrackingData();
+
+      const eventPayload = {
+        phone_href: link.getAttribute('href') || '',
+        click_text: (link.textContent || '').trim(),
+        click_context: detectPhoneClickContext(link),
+        device_type: adData.device_type || getDeviceType(),
+        landing_url: adData.landing_url || window.location.href
+      };
+
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'phone_click',
+        ...eventPayload
+      });
+
+      if (typeof gtag === 'function') {
+        gtag('event', 'phone_click', eventPayload);
+      }
+    });
+  });
+}
+
+function detectPhoneClickContext(element) {
+  const parent = element.closest('header, footer, .hero, .floating-cta, .fixed-bottom-bar, .mobile-fixed-form, .final-cta-v2');
+
+  if (!parent) return 'unknown';
+  if (parent.id) return parent.id;
+  if (typeof parent.className === 'string' && parent.className.trim()) {
+    return parent.className.trim().split(/\s+/)[0];
+  }
+
+  return 'unknown';
+}
+
+/**
+ * 폼의 variant(식별자)를 자동 감지합니다.
+ * - form에 id가 있으면 그대로 사용
+ * - 없으면 부모 섹션의 class명 기반으로 추론
+ * @param {HTMLFormElement} form
+ * @returns {string}
+ */
+function detectFormVariant(form) {
+  // 1) form id 사용
+  if (form.id) return form.id;
+
+  // 2) 부모 섹션 class 기반 추론
+  const parent = form.closest('section, .hero, .final-cta-v2, .mobile-fixed-form, .fixed-bottom-bar, .floating-cta');
+  if (parent) {
+    if (parent.classList.contains('hero')) return 'hero_form';
+    if (parent.classList.contains('final-cta-v2')) return 'final_cta_form';
+    if (parent.classList.contains('mobile-fixed-form')) return 'mobile_bottom_form';
+    if (parent.classList.contains('fixed-bottom-bar')) return 'desktop_bar_form';
+    if (parent.classList.contains('floating-cta')) return 'floating_form';
+    if (parent.id) return parent.id + '_form';
+  }
+
+  return 'unknown_form';
+}
+
+/**
+ * 동일 세션 내 동일 전화번호 제출 여부를 확인합니다.
+ * @param {string} phone - 전화번호 (숫자만)
+ * @returns {boolean} 중복이면 true
+ */
+function hasSubmittedPhone(phone) {
+  if (!phone) return false;
+
+  /** @type {string[]} */
+  let submitted = [];
+  try {
+    const raw = sessionStorage.getItem('_submitted_phones');
+    if (raw) submitted = JSON.parse(raw);
+  } catch { /* ignore */ }
+
+  return submitted.includes(LeadUtils.toDigits(phone));
+}
+
+/**
+ * 현재 세션에서 성공적으로 제출한 전화번호를 기록합니다.
+ * @param {string} phone
+ * @returns {void}
+ */
+function rememberSubmittedPhone(phone) {
+  if (!phone) return;
+
+  /** @type {string[]} */
+  let submitted = [];
+  try {
+    const raw = sessionStorage.getItem('_submitted_phones');
+    if (raw) submitted = JSON.parse(raw);
+  } catch { /* ignore */ }
+
+  const normalized = LeadUtils.toDigits(phone);
+  if (submitted.includes(normalized)) return;
+
+  submitted.push(normalized);
+  sessionStorage.setItem('_submitted_phones', JSON.stringify(submitted));
+}
 
 /**
  * Swiper 리뷰 캐러셀을 초기화합니다.
@@ -170,7 +369,7 @@ function initForms() {
   });
 
   document.querySelectorAll('form').forEach((/** @type {HTMLFormElement} */ form) => {
-    bindStandardForm(form);
+    bindStandardFormSecure(form);
   });
 }
 
@@ -178,14 +377,50 @@ function initForms() {
  * 클라이언트의 IP 주소를 비동기로 가져옵니다.
  * @returns {Promise<string>}
  */
-async function getClientIp() {
-  try {
-    const res = await fetch('https://api.ipify.org?format=json');
-    const data = await res.json();
-    return data.ip;
-  } catch (e) {
-    return 'IP fetch failed';
+function ensureHoneypotField(form) {
+  if (form.querySelector('input[name="website"]')) return;
+
+  /** @type {HTMLInputElement} */
+  const honeypot = document.createElement('input');
+  honeypot.type = 'text';
+  honeypot.name = 'website';
+  honeypot.autocomplete = 'off';
+  honeypot.tabIndex = -1;
+  honeypot.hidden = true;
+  honeypot.setAttribute('aria-hidden', 'true');
+  form.appendChild(honeypot);
+}
+
+function sendLeadConversion(phone, onComplete) {
+  const finish = typeof onComplete === 'function' ? onComplete : () => {};
+
+  if (typeof gtag !== 'function') {
+    finish();
+    return;
   }
+
+  let settled = false;
+  const safeFinish = () => {
+    if (settled) return;
+    settled = true;
+    finish();
+  };
+
+  /** @type {{ send_to: string, value: number, currency: string, event_callback: () => void, user_data?: { phone_number: string } }} */
+  const payload = {
+    send_to: GOOGLE_ADS_CONVERSION_ID,
+    value: 1.0,
+    currency: 'KRW',
+    event_callback: safeFinish
+  };
+
+  const phoneNumber = LeadUtils.normalizePhoneToE164(phone);
+  if (phoneNumber) {
+    payload.user_data = { phone_number: phoneNumber };
+  }
+
+  gtag('event', 'conversion', payload);
+  window.setTimeout(safeFinish, 1000);
 }
 
 /**
@@ -195,7 +430,10 @@ async function getClientIp() {
  * @returns {void}
  */
 function bindStandardForm(form) {
-  form.addEventListener('submit', async (/** @type {SubmitEvent} */ event) => {
+  bindStandardFormSecure(form);
+  return;
+
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
     /** @type {HTMLInputElement | null} */
@@ -208,6 +446,8 @@ function bindStandardForm(form) {
     /** @type {HTMLInputElement | null} */
     const phoneInput = form.querySelector('input[type="tel"]');
     if (phoneInput && !validatePhone(phoneInput.value)) {
+      reportFieldError(phoneInput, '전화번호를 확인해 주세요.');
+      return;
       reportFieldError(phoneInput, '휴대폰 번호를 정확히 입력해 주세요.');
       return;
     }
@@ -240,13 +480,43 @@ function bindStandardForm(form) {
       const ip = await getClientIp();
       const typeText = typeSelect && typeSelect.selectedIndex >= 0 ? typeSelect.options[typeSelect.selectedIndex].text : '';
       
+      /** @type {HTMLInputElement | null} */
+      const sourcePageInput = form.querySelector('input[name="source_page"]');
+      const sourcePage = sourcePageInput ? sourcePageInput.value : '이벤트페이지';
+
+      // 광고 추적 데이터 (gclid, UTM, referrer 등)
+      const adData = getAdTrackingData();
+
+      // 폼 식별자: form id가 있으면 사용, 없으면 부모 섹션 기반 추론
+      const formVariant = detectFormVariant(form);
+
+      // 중복 제출 감지
+      const isDuplicate = checkDuplicateSubmission(phoneInput ? phoneInput.value.trim() : '');
+
       const payload = {
         name: nameInput ? nameInput.value.trim() : '',
         phone: phoneInput ? phoneInput.value.trim() : '',
-        source: '이벤트페이지',
+        source: sourcePage,
         status: 'New',
         inquiry_form: typeText,
-        created_at: new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().replace('Z', '+09:00')
+        created_at: new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().replace('Z', '+09:00'),
+        // 광고 식별자
+        gclid: adData.gclid || null,
+        gbraid: adData.gbraid || null,
+        wbraid: adData.wbraid || null,
+        // UTM 파라미터
+        utm_source: adData.utm_source || null,
+        utm_medium: adData.utm_medium || null,
+        utm_campaign: adData.utm_campaign || null,
+        utm_term: adData.utm_term || null,
+        utm_content: adData.utm_content || null,
+        // 유입 문맥
+        referrer: adData.referrer || null,
+        landing_url: adData.landing_url || null,
+        device_type: adData.device_type || null,
+        // 폼 식별 + 품질
+        form_variant: formVariant,
+        is_duplicate: isDuplicate
       };
 
       const { error } = await window.supabaseClient.from('lead').insert([payload]);
@@ -280,7 +550,6 @@ function bindStandardForm(form) {
         console.error('Supabase Insert Error:', error);
         showResultToast('error', '접수 실패', '앗, 데이터베이스 연결 중 지연이 발생했습니다.<br>다시 한번 시도해 주시거나 전화 상담을 이용해주세요.');
       } else {
-        showResultToast('success', '상담 신청 완료', '성공적으로 접수되었습니다.<br>담당 상담사가 확인 후 순차적으로 연락을 도와드리겠습니다.');
         if (window.incrementCtaCounter) window.incrementCtaCounter();
 
         // Google Ads / GA4 전환 이벤트 (dataLayer)
@@ -293,12 +562,16 @@ function bindStandardForm(form) {
           lead_phone_masked: payload.phone.replace(/\d{4}$/, '****')
         });
 
-        // Google Ads 클릭 전환 측정
-        if (typeof gtag_report_conversion === 'function') {
-          gtag_report_conversion();
-        }
+        // 전환 완료 페이지로 데이터 전달 (sessionStorage)
+        sessionStorage.setItem('completeData', JSON.stringify({
+          name: payload.name,
+          phone: payload.phone,
+          type: typeText
+        }));
 
-        form.reset();
+        // 전환 완료 페이지로 이동
+        window.location.href = 'complete.html';
+        return;
       }
     } catch (err) {
       console.error('Unexpected Form Submit Error:', err);
@@ -318,8 +591,307 @@ function bindStandardForm(form) {
  * @param {string} value - 검증할 전화번호 문자열
  * @returns {boolean} 유효하면 true, 그렇지 않으면 false
  */
+const __unusedSecureBinder = String.raw`
+function bindStandardFormSecure(form) {
+  ensureHoneypotField(form);
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    /** @type {HTMLInputElement | null} */
+    const nameInput = form.querySelector('input[name*="name"]');
+    if (nameInput && !nameInput.value.trim()) {
+      reportFieldError(nameInput, '?대쫫???낅젰??二쇱꽭??');
+      return;
+    }
+
+    /** @type {HTMLInputElement | null} */
+    const phoneInput = form.querySelector('input[type="tel"]');
+    if (phoneInput && !validatePhone(phoneInput.value)) {
+      reportFieldError(phoneInput, '?대???踰덊샇瑜??뺥솗???낅젰??二쇱꽭??');
+      return;
+    }
+
+    /** @type {HTMLSelectElement | null} */
+    const typeSelect = form.querySelector('select[name*="propertyType"], select[name="loanType"]');
+    if (typeSelect && !typeSelect.value) {
+      reportFieldError(typeSelect, '?異??곹뭹???좏깮??二쇱꽭??');
+      return;
+    }
+
+    /** @type {HTMLInputElement | null} */
+    const privacyConsentInput = form.querySelector('input[name="consentPrivacy"], input[name="consent"]');
+    if (privacyConsentInput && !privacyConsentInput.checked) {
+      reportFieldError(privacyConsentInput, '媛쒖씤?뺣낫 ?섏쭛 諛??댁슜???숈쓽??二쇱꽭??');
+      return;
+    }
+
+    /** @type {HTMLInputElement | null} */
+    const thirdPartyConsentInput = form.querySelector('input[name="consentThirdParty"]');
+    if (thirdPartyConsentInput && !thirdPartyConsentInput.checked) {
+      reportFieldError(thirdPartyConsentInput, '媛쒖씤?뺣낫 ?쒓났 ?숈쓽媛 ?꾩슂?⑸땲??');
+      return;
+    }
+
+    /** @type {HTMLButtonElement | null} */
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn ? submitBtn.innerText : '臾대즺 ?곷떞 ?좎껌';
+    if (submitBtn) {
+      submitBtn.innerText = '?좎껌 以?..';
+      submitBtn.disabled = true;
+    }
+
+    showResultToast('loading', '?좎껌 ?묒닔 以?, '?쒕쾭濡??곗씠?곕? ?덉쟾?섍쾶 ?꾩넚?섍퀬 ?덉뒿?덈떎.<br>?좎떆留?湲곕떎?ㅼ＜?몄슂.');
+
+    try {
+      const typeText = typeSelect && typeSelect.selectedIndex >= 0 ? typeSelect.options[typeSelect.selectedIndex].text : '';
+
+      /** @type {HTMLInputElement | null} */
+      const sourcePageInput = form.querySelector('input[name="source_page"]');
+      const sourcePage = sourcePageInput ? sourcePageInput.value : '?대깽?명럹?댁?';
+
+      /** @type {HTMLInputElement | null} */
+      const marketingConsentInput = form.querySelector('input[name="consentMarketing"]');
+
+      /** @type {HTMLInputElement | null} */
+      const honeypotInput = form.querySelector('input[name="website"]');
+
+      const phoneValue = phoneInput ? phoneInput.value.trim() : '';
+      const payload = {
+        name: nameInput ? nameInput.value.trim() : '',
+        phone: phoneValue,
+        source: sourcePage,
+        inquiryForm: typeText,
+        formVariant: detectFormVariant(form),
+        isDuplicate: hasSubmittedPhone(phoneValue),
+        consents: {
+          privacy: Boolean(privacyConsentInput && privacyConsentInput.checked),
+          thirdParty: Boolean(thirdPartyConsentInput && thirdPartyConsentInput.checked),
+          marketing: Boolean(marketingConsentInput && marketingConsentInput.checked)
+        },
+        adData: getAdTrackingData(),
+        website: honeypotInput ? honeypotInput.value : '',
+        sessionDurationMs: getSessionDurationMs()
+      };
+
+      const response = await fetch('/api/lead', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      /** @type {{ ok?: boolean, displayData?: { name?: string, phone?: string, type?: string }, webhookDelivered?: boolean }} */
+      let result = {};
+      try {
+        result = await response.json();
+      } catch {
+        result = {};
+      }
+
+      if (!response.ok || !result.ok) {
+        showResultToast('error', '?묒닔 ?ㅽ뙣', '?? ?곗씠?곕쿋?댁뒪 ?곌껐 以?吏?곗씠 諛쒖깮?덉뒿?덈떎.<br>?ㅼ떆 ?쒕쾲 ?쒕룄??二쇱떆嫄곕굹 ?꾪솕 ?곷떞???댁슜?댁＜?몄슂.');
+        return;
+      }
+
+      if (window.incrementCtaCounter) window.incrementCtaCounter();
+      rememberSubmittedPhone(phoneValue);
+
+      const leadEventPayload = {
+        form_name: form.id || 'inquiry',
+        lead_type: typeText,
+        lead_name: payload.name,
+        lead_phone_masked: phoneValue.replace(/\d{4}$/, '****')
+      };
+
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'form_submission_success',
+        ...leadEventPayload
+      });
+
+      if (typeof gtag === 'function') {
+        gtag('event', 'generate_lead', {
+          currency: 'KRW',
+          value: 1,
+          ...leadEventPayload
+        });
+      }
+
+      if (result.webhookDelivered === false) {
+        console.warn('Lead saved, but webhook delivery failed.');
+      }
+
+      sessionStorage.setItem('completeData', JSON.stringify(
+        result.displayData || LeadUtils.createSafeCompleteData({
+          name: payload.name,
+          phone: phoneValue,
+          type: typeText
+        })
+      ));
+
+      sendLeadConversion(phoneValue, () => {
+        window.location.href = COMPLETE_PAGE_PATH;
+      });
+      return;
+    } catch (err) {
+      console.error('Unexpected Form Submit Error:', err);
+      showResultToast('error', '?덇린移??딆? ?ㅻ쪟', '?쇱떆?곸씤 ?쒕쾭 臾몄젣媛 諛쒖깮?덉뒿?덈떎.<br>1866-1019濡??곕씫二쇱떆硫?諛붾줈 ?덈궡 ?꾩??쒕━寃좎뒿?덈떎.');
+    } finally {
+      if (submitBtn) {
+        submitBtn.innerText = originalBtnText;
+        submitBtn.disabled = false;
+      }
+    }
+  });
+}
+
+`;
+function bindStandardFormSecure(form) {
+  ensureHoneypotField(form);
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    /** @type {HTMLInputElement | null} */
+    const nameInput = form.querySelector('input[name*="name"]');
+    if (nameInput && !nameInput.value.trim()) {
+      reportFieldError(nameInput, '이름을 입력해 주세요.');
+      return;
+    }
+
+    /** @type {HTMLInputElement | null} */
+    const phoneInput = form.querySelector('input[type="tel"]');
+    if (phoneInput && !validatePhone(phoneInput.value)) {
+      reportFieldError(phoneInput, '전화번호를 확인해 주세요.');
+      return;
+    }
+
+    /** @type {HTMLSelectElement | null} */
+    const typeSelect = form.querySelector('select[name*="propertyType"], select[name="loanType"]');
+    if (typeSelect && !typeSelect.value) {
+      reportFieldError(typeSelect, '대출 상품을 선택해 주세요.');
+      return;
+    }
+
+    /** @type {HTMLInputElement | null} */
+    const privacyConsentInput = form.querySelector('input[name="consentPrivacy"], input[name="consent"]');
+    if (privacyConsentInput && !privacyConsentInput.checked) {
+      reportFieldError(privacyConsentInput, '개인정보 수집 및 이용에 동의해 주세요.');
+      return;
+    }
+
+    /** @type {HTMLInputElement | null} */
+    const thirdPartyConsentInput = form.querySelector('input[name="consentThirdParty"]');
+    if (thirdPartyConsentInput && !thirdPartyConsentInput.checked) {
+      reportFieldError(thirdPartyConsentInput, '개인정보 제3자 제공 동의가 필요합니다.');
+      return;
+    }
+
+    /** @type {HTMLButtonElement | null} */
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn ? submitBtn.innerText : '무료 상담 요청';
+    if (submitBtn) {
+      submitBtn.innerText = '신청 중...';
+      submitBtn.disabled = true;
+    }
+
+    showResultToast('loading', '신청 접수 중', '서버로 데이터를 안전하게 전송하고 있습니다.<br>잠시만 기다려주세요.');
+
+    try {
+      const typeText = typeSelect && typeSelect.selectedIndex >= 0 ? typeSelect.options[typeSelect.selectedIndex].text : '';
+
+      /** @type {HTMLInputElement | null} */
+      const sourcePageInput = form.querySelector('input[name="source_page"]');
+      const sourcePage = sourcePageInput ? sourcePageInput.value : 'event_page';
+
+      /** @type {HTMLInputElement | null} */
+      const marketingConsentInput = form.querySelector('input[name="consentMarketing"]');
+
+      /** @type {HTMLInputElement | null} */
+      const honeypotInput = form.querySelector('input[name="website"]');
+
+      const phoneValue = phoneInput ? phoneInput.value.trim() : '';
+      const payload = {
+        name: nameInput ? nameInput.value.trim() : '',
+        phone: phoneValue,
+        source: sourcePage,
+        inquiryForm: typeText,
+        formVariant: detectFormVariant(form),
+        isDuplicate: hasSubmittedPhone(phoneValue),
+        consents: {
+          privacy: Boolean(privacyConsentInput && privacyConsentInput.checked),
+          thirdParty: Boolean(thirdPartyConsentInput && thirdPartyConsentInput.checked),
+          marketing: Boolean(marketingConsentInput && marketingConsentInput.checked)
+        },
+        adData: getAdTrackingData(),
+        website: honeypotInput ? honeypotInput.value : '',
+        sessionDurationMs: getSessionDurationMs()
+      };
+
+      const response = await fetch('/api/lead', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      /** @type {{ ok?: boolean, displayData?: { name?: string, phone?: string, type?: string }, webhookDelivered?: boolean }} */
+      let result = {};
+      try {
+        result = await response.json();
+      } catch {
+        result = {};
+      }
+
+      if (!response.ok || !result.ok) {
+        showResultToast('error', '접수 실패', '요청 처리 중 문제가 발생했습니다.<br>잠시 후 다시 시도해 주세요.');
+        return;
+      }
+
+      if (window.incrementCtaCounter) window.incrementCtaCounter();
+      rememberSubmittedPhone(phoneValue);
+
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'form_submission_success',
+        form_name: form.id || 'inquiry',
+        lead_type: typeText,
+        lead_name: payload.name,
+        lead_phone_masked: phoneValue.replace(/\d{4}$/, '****')
+      });
+
+      if (result.webhookDelivered === false) {
+        console.warn('Lead saved, but webhook delivery failed.');
+      }
+
+      sessionStorage.setItem('completeData', JSON.stringify(
+        result.displayData || LeadUtils.createSafeCompleteData({
+          name: payload.name,
+          phone: phoneValue,
+          type: typeText
+        })
+      ));
+
+      sendLeadConversion(phoneValue, () => {
+        window.location.href = COMPLETE_PAGE_PATH;
+      });
+    } catch (err) {
+      console.error('Unexpected Form Submit Error:', err);
+      showResultToast('error', '예기치 않은 오류', '일시적인 서버 문제가 발생했습니다.<br>1866-1019로 연락주시면 바로 안내해 드리겠습니다.');
+    } finally {
+      if (submitBtn) {
+        submitBtn.innerText = originalBtnText;
+        submitBtn.disabled = false;
+      }
+    }
+  });
+}
+
 function validatePhone(value) {
-  return /^01[016789]\d{7,8}$/.test(value.replace(/-/g, ''));
+  return LeadUtils.isValidPhone(value);
 }
 
 /**
@@ -328,31 +900,7 @@ function validatePhone(value) {
  * @returns {void}
  */
 function formatPhone(input) {
-  // 1) 사용자가 입력한 전체 문자열에서 숫자만 추출
-  let rawValue = input.value.replace(/\D/g, '');
-
-  // 2) 010 패턴 강제화 (첫 3자리가 '010'이 아니면 무조건 '010' 먼저 씌움)
-  if (!rawValue.startsWith('010')) {
-    rawValue = '010' + rawValue;
-  }
-
-  // 3) 앞의 '010' 3자리를 제외한 실질적인 입력 '나머지 숫자' 추출
-  let restValue = rawValue.substring(3);
-
-  /** @type {string} */
-  let value = '010';
-
-  // 4) 길이에 따른 하이픈(-) 포맷팅 완성 (0~4자리, 5~8자리) - 010 제외하고 최대 8자리
-  if (restValue.length > 0 && restValue.length <= 4) {
-    value += `-${restValue}`;
-  } else if (restValue.length > 4) {
-    // 최대 8자리까지만 자름
-    value += `-${restValue.slice(0, 4)}-${restValue.slice(4, 8)}`;
-  } else {
-    value += `-`; // 숫자가 없으면 기본 010- 유지
-  }
-
-  input.value = value;
+  input.value = LeadUtils.formatPhoneInputValue(input.value);
 }
 
 /**
@@ -901,5 +1449,31 @@ function initConsentAll() {
     cb.addEventListener('change', () => {
       allCheck.checked = [...childBoxes].every(c => c.checked);
     });
+  });
+}
+
+/**
+ * @description 보이스피싱 경고 팝업 - 하루 동안 그만보기 (localStorage)
+ */
+function initFraudPopup() {
+  const overlay = document.getElementById('fraudPopup');
+  const closeBtn = document.getElementById('fraudPopupClose');
+  const hideCheck = document.getElementById('fraudPopupHide');
+  if (!overlay || !closeBtn) return;
+
+  const STORAGE_KEY = 'fraudPopupHideUntil';
+  const hideUntil = localStorage.getItem(STORAGE_KEY);
+
+  if (hideUntil && Date.now() < Number(hideUntil)) {
+    overlay.classList.add('hidden');
+    return;
+  }
+
+  closeBtn.addEventListener('click', () => {
+    if (hideCheck && hideCheck.checked) {
+      const tomorrow = Date.now() + 24 * 60 * 60 * 1000;
+      localStorage.setItem(STORAGE_KEY, String(tomorrow));
+    }
+    overlay.classList.add('hidden');
   });
 }
