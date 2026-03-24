@@ -48,7 +48,7 @@ test('rejects suspiciously fast submissions and fake lead data', () => {
     name: 'test',
     phone: '010-0000-0000',
     inquiryForm: '아파트',
-    sessionDurationMs: 500,
+    sessionDurationMs: 300,
     consents: {
       privacy: true,
       thirdParty: true
