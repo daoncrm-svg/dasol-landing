@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { buildLeadPayload, validateLeadRequest } = require('../lib/lead-handler.js');
+const { buildLeadPayload, deriveCampaignAttribution, validateLeadRequest } = require('../lib/lead-handler.js');
 
 test('validates a complete lead submission body', () => {
   const result = validateLeadRequest({
@@ -68,6 +68,12 @@ test('builds a lead payload with legacy database fields intact', () => {
     inquiryForm: '주택',
     formVariant: 'hero_form',
     isDuplicate: false,
+    attribution: {
+      adPlatform: 'GOOGLE_ADS',
+      campaignChannel: 'SA',
+      campaignName: 'sa_event',
+      trafficLabel: 'GOOGLE_ADS | SA'
+    },
     adData: {
       gclid: 'abc',
       gbraid: null,
@@ -87,4 +93,24 @@ test('builds a lead payload with legacy database fields intact', () => {
   assert.equal(payload.inquiry_form, '주택');
   assert.equal(payload.form_variant, 'hero_form');
   assert.equal(payload.utm_medium, 'cpc');
+  assert.equal(payload.source, 'index | GOOGLE_ADS | SA');
+});
+
+test('derives search and pmax attribution labels from ad data', () => {
+  const sa = deriveCampaignAttribution({
+    utm_source: 'google',
+    utm_medium: 'cpc',
+    utm_campaign: 'sa_event',
+    utm_term: '??????'
+  });
+  const pmax = deriveCampaignAttribution({
+    utm_source: 'google',
+    utm_medium: 'cpc',
+    utm_campaign: 'pmax_event'
+  });
+
+  assert.equal(sa.campaignChannel, 'SA');
+  assert.equal(sa.trafficLabel, 'GOOGLE_ADS | SA');
+  assert.equal(pmax.campaignChannel, 'PMAX');
+  assert.equal(pmax.trafficLabel, 'GOOGLE_ADS | PMAX');
 });

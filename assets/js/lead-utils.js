@@ -9,14 +9,36 @@
     root.LeadUtils = api;
   }
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
-  const MOBILE_PHONE_REGEX = /^01[016789]\d{7,8}$/;
+  const MOBILE_PHONE_REGEX = /^010\d{8}$/;
 
   function toDigits(value) {
     return String(value || '').replace(/\D/g, '');
   }
 
+  function getPhoneRestDigits(value) {
+    const digits = toDigits(value);
+
+    if (digits.startsWith('010')) {
+      return digits.slice(3, 11);
+    }
+    if (digits.startsWith('10')) {
+      return digits.slice(2, 10);
+    }
+
+    return digits.slice(0, 8);
+  }
+
   function normalizePhone(value) {
-    return toDigits(value).slice(0, 11);
+    const digits = toDigits(value);
+
+    if (digits.startsWith('010')) {
+      return `010${getPhoneRestDigits(digits)}`;
+    }
+    if (digits.startsWith('10')) {
+      return `010${getPhoneRestDigits(digits)}`;
+    }
+
+    return digits.slice(0, 11);
   }
 
   function isValidPhone(value) {
@@ -24,18 +46,14 @@
   }
 
   function formatPhoneInputValue(value) {
-    const digits = normalizePhone(value);
+    const restDigits = getPhoneRestDigits(value);
 
-    if (!digits) return '';
-    if (digits.length <= 3) return digits;
-    if (digits.length <= 7) {
-      return `${digits.slice(0, 3)}-${digits.slice(3)}`;
-    }
-    if (digits.length === 10) {
-      return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+    if (!restDigits) return '010-';
+    if (restDigits.length <= 4) {
+      return `010-${restDigits}`;
     }
 
-    return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7, 11)}`;
+    return `010-${restDigits.slice(0, 4)}-${restDigits.slice(4, 8)}`;
   }
 
   function maskPhone(value) {
@@ -62,45 +80,33 @@
   }
 
   function normalizePhoneToE164(value) {
-    const digits = toDigits(value);
+    const digits = normalizePhone(value);
 
-    if (!digits) return '';
-    if (digits.startsWith('0')) return `+82${digits.slice(1)}`;
-    if (digits.startsWith('82')) return `+${digits}`;
+    if (!isValidPhone(digits)) return '';
 
-    return `+${digits}`;
+    return `+82${digits.slice(1)}`;
   }
 
   function normalizeName(value) {
-    return String(value || '').replace(/\s+/g, ' ').trim();
+    return String(value || '').replace(/\s+/g, '').trim();
   }
 
   function isLikelyValidLeadName(value) {
     const normalized = normalizeName(value);
 
     if (!normalized) return false;
-    if (normalized.length < 2 || normalized.length > 20) return false;
-    if (/\d/.test(normalized)) return false;
-    if (!/^[A-Za-z가-힣\s]+$/.test(normalized)) return false;
+    if (normalized.length < 3 || normalized.length > 5) return false;
+    if (!/^[가-힣]+$/.test(normalized)) return false;
 
-    const compact = normalized.replace(/\s+/g, '');
-    const lower = compact.toLowerCase();
+    const lower = normalized.toLowerCase();
     const blocked = new Set([
-      'admin',
-      'asdf',
-      'none',
-      'null',
-      'qwer',
-      'test',
-      'tester',
-      'unknown',
       '무',
       '없음',
       '테스트'
     ]);
 
     if (blocked.has(lower)) return false;
-    if (/^(.)\1+$/.test(compact)) return false;
+    if (/^(.)\1+$/.test(normalized)) return false;
 
     return true;
   }

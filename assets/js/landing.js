@@ -364,7 +364,38 @@ function initFadeIn() {
  * @returns {void}
  */
 function initForms() {
+  document.querySelectorAll('input[name*="name"]').forEach((/** @type {HTMLInputElement} */ input) => {
+    input.maxLength = 5;
+    input.minLength = 3;
+    input.pattern = '[가-힣]{3,5}';
+    input.inputMode = 'text';
+  });
+
   document.querySelectorAll('input[type="tel"]').forEach((/** @type {HTMLInputElement} */ input) => {
+    input.inputMode = 'numeric';
+    input.maxLength = 13;
+    if (!input.value) {
+      input.value = '010-';
+    } else {
+      formatPhone(input);
+    }
+
+    input.addEventListener('focus', () => {
+      if (!input.value) input.value = '010-';
+      formatPhone(input);
+    });
+
+    input.addEventListener('keydown', (event) => {
+      const selectionStart = input.selectionStart ?? 0;
+      const selectionEnd = input.selectionEnd ?? 0;
+      const isPrefixSelection = selectionStart < 4 || selectionEnd < 4;
+
+      if ((event.key === 'Backspace' && selectionStart <= 4) || (event.key === 'Delete' && isPrefixSelection)) {
+        event.preventDefault();
+        input.setSelectionRange(4, 4);
+      }
+    });
+
     input.addEventListener('input', () => formatPhone(input));
   });
 
@@ -901,6 +932,10 @@ function validatePhone(value) {
  */
 function formatPhone(input) {
   input.value = LeadUtils.formatPhoneInputValue(input.value);
+
+  if ((input.selectionStart ?? 0) < 4) {
+    input.setSelectionRange(4, 4);
+  }
 }
 
 /**
