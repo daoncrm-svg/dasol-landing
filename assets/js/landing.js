@@ -6,6 +6,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   initAdTracking();
+  initCtaClickTracking();
+  initLeadSubmitTracking();
   initPhoneClickTracking();
   initSwiper();
   initCtaRollers();
@@ -140,6 +142,135 @@ function initPhoneClickTracking() {
         gtag('event', 'phone_click', eventPayload);
       }
     });
+  });
+}
+
+function initCtaClickTracking() {
+  const ctaSelector = [
+    '.hero-cta-btn',
+    '.lp-spec-cta a',
+    '.float-btn.apply',
+    '.trust-card.product-link',
+    '.nav-link[href*="cta"]'
+  ].join(', ');
+
+  document.querySelectorAll(ctaSelector).forEach((element) => {
+    element.addEventListener('click', () => {
+      const adData = getAdTrackingData();
+      const target = element.getAttribute('href')
+        || element.getAttribute('data-scroll-to')
+        || (element instanceof HTMLButtonElement ? 'form_submit' : '');
+
+      const eventPayload = {
+        click_text: (element.textContent || '').trim(),
+        click_target: target,
+        click_context: detectCtaClickContext(element),
+        device_type: adData.device_type || getDeviceType(),
+        landing_url: adData.landing_url || window.location.href
+      };
+
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'cta_click',
+        ...eventPayload
+      });
+
+      if (typeof gtag === 'function') {
+        gtag('event', 'cta_click', eventPayload);
+      }
+    });
+  });
+}
+
+function detectCtaClickContext(element) {
+  const parent = element.closest('header, nav, .hero, .lp-spec-cta, .floating-cta, .final-cta-v2, .trust-grid, section');
+
+  if (!parent) return 'unknown';
+  if (parent.id) return parent.id;
+  if (typeof parent.className === 'string' && parent.className.trim()) {
+    return parent.className.trim().split(/\s+/)[0];
+  }
+
+  return 'unknown';
+}
+
+function trackAnalyticsEvent(eventName, payload) {
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({
+    event: eventName,
+    ...payload
+  });
+
+  if (typeof gtag === 'function') {
+    gtag('event', eventName, payload);
+  }
+}
+
+function trackLeadSubmitAttempt(form, submitBtn, phoneValue, nameValue) {
+  trackAnalyticsEvent('lead_submit_attempt', {
+    form_name: form.id || 'inquiry',
+    form_variant: detectFormVariant(form),
+    submit_text: (submitBtn?.textContent || '').trim(),
+    has_name: Boolean(nameValue),
+    has_phone: Boolean(phoneValue),
+    phone_digits_length: LeadUtils.toDigits(phoneValue || '').length
+  });
+}
+
+function trackLeadValidationError(form, fieldName, message) {
+  trackAnalyticsEvent('lead_submit_validation_error', {
+    form_name: form.id || 'inquiry',
+    form_variant: detectFormVariant(form),
+    invalid_field: fieldName,
+    error_message: message
+  });
+}
+
+function initLeadSubmitTracking() {
+  document.querySelectorAll('form').forEach((form) => {
+    form.addEventListener('submit', () => {
+      /** @type {HTMLInputElement | null} */
+      const nameInput = form.querySelector('input[name*="name"]');
+      /** @type {HTMLInputElement | null} */
+      const phoneInput = form.querySelector('input[type="tel"]');
+      /** @type {HTMLSelectElement | null} */
+      const typeSelect = form.querySelector('select[name*="propertyType"], select[name="loanType"]');
+      /** @type {HTMLInputElement | null} */
+      const privacyConsentInput = form.querySelector('input[name="consentPrivacy"], input[name="consent"]');
+      /** @type {HTMLInputElement | null} */
+      const thirdPartyConsentInput = form.querySelector('input[name="consentThirdParty"]');
+      /** @type {HTMLButtonElement | null} */
+      const submitBtn = form.querySelector('button[type="submit"]');
+
+      const nameValue = nameInput ? nameInput.value.trim() : '';
+      const phoneValue = phoneInput ? phoneInput.value.trim() : '';
+
+      trackLeadSubmitAttempt(form, submitBtn, phoneValue, nameValue);
+
+      if (nameInput && !nameValue) {
+        trackLeadValidationError(form, 'name', '이름을 입력해 주세요.');
+        return;
+      }
+
+      if (phoneInput && !validatePhone(phoneInput.value)) {
+        trackLeadValidationError(form, 'phone', '전화번호를 확인해 주세요.');
+        return;
+      }
+
+      if (typeSelect && !typeSelect.value) {
+        trackLeadValidationError(form, 'loan_type', '대출 상품을 선택해 주세요.');
+        return;
+      }
+
+      if (privacyConsentInput && !privacyConsentInput.checked) {
+        trackLeadValidationError(form, 'consent_privacy', '개인정보 수집 및 이용에 동의해 주세요.');
+        return;
+      }
+
+      if (thirdPartyConsentInput && !thirdPartyConsentInput.checked) {
+        trackLeadValidationError(form, 'consent_third_party', '개인정보 제3자 제공 동의가 필요합니다.');
+      }
+    }, true);
   });
 }
 
