@@ -1,0 +1,158 @@
+$(document).on('click', '.eveSubmitBtn', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    var $form = $(this.form);
+
+    if ($form.find('[name="name"]').val() == "") {
+        alert("성함을 입력하세요");
+        return false;
+    }
+    if ($form.find('[name="hp1"]').val() == "" || $form.find('[name="hp2"]').val() == "" || $form.find('[name="hp3"]').val() == "") {
+        alert("연락처를 입력하세요");
+        return false
+    }
+    var phone = $form.find('[name="hp1"]').val() + "-" + $form.find('[name="hp2"]').val() + "-" + $form.find('[name="hp3"]').val();
+    $form.find('[name="phone"]').val(phone);
+
+    if ($form.find('[name="policy"]').is(":checked") == false) {
+        alert("개인정보처리방침을 동의해야 합니다.");
+        return false
+    }
+
+    $.ajax({
+        type: 'post',
+        url: 'https://moum-on.co.kr/inst_in/inst_in_dampick_co_kr_oneWay.asp',
+        data: $form.serialize(),
+        dataType: 'html',
+        success: function (e) {
+            var chk = e;
+            console.log(chk);
+            if (chk == "상담신청완료") {
+                location.href = '/done.php';
+                return false;
+            } else if (chk == "중복접수") {
+                alert("중복접수");
+                return false;
+            } else {
+                alert("접수실패");
+                return false;
+            }
+        },
+        error: function (response) {
+            if (response.responseJSON.message) {
+                alert(response.responseJSON.message);
+            }
+            if (response.responseJSON.inputName) {
+                $form.find('[name="' + response.responseJSON.inputName + '"]').focus();
+            }
+        },
+    });
+});
+function ajaxSend(ths) {
+    var $form = ths;
+    $.ajax({
+        type: 'post',
+        url: 'https://addonapi.uu-o.com/api/store',
+        data: $form.serialize(),
+        dataType: 'json',
+        success: function (response) {
+            console.log(response);
+            location.href = '/done.php';
+        },
+        error: function (response) {
+            if (response.responseJSON.message) {
+                alert(response.responseJSON.message);
+            }
+            if (response.responseJSON.inputName) {
+                $form.find('[name="' + response.responseJSON.inputName + '"]').focus();
+            }
+        },
+    });
+}
+$("input:text[numberOnly]").on("keyup", function () {
+    $(this).val($(this).val().replace(/[^0-9]/g, ""));
+});
+$(document).on("keyup", ".hp", function () {
+    if ($(this).val().length >= 4) {
+        $(this).next(".hp").focus();
+    }
+});
+$(document).on("click", "#top_btn", function () {
+    $("html, body").animate({ scrollTop: 0 }, '500');
+    return false;
+});
+
+function maxLengthCheck(object) {
+    if (object.value.length > object.maxLength) {
+        object.value = object.value.slice(0, object.maxLength);
+    }
+}
+function checkProduct(selectElement) {
+    var selectedValue = selectElement.value;
+    var carnumElement = document.getElementById("carnum");
+
+    if (selectedValue === "차량담보대출") {
+        carnumElement.style.display = "block";
+    } else {
+        carnumElement.style.display = "none";
+    }
+}
+
+
+// modal 관련 script
+function scrollDisable() { 
+    $('html, body').css({ 'overflow': 'hidden'}); // 스크롤 숨기기
+    
+    $('html, body').on('scroll touchmove mousewheel', function (event) { 
+        event.preventDefault();
+        //event.stopPropagation();
+        return false;
+    });
+}
+
+function scrollAble() { 
+    $('html, body').css({'overflow': ''}); // 스크롤 숨기기 해제
+    $('html, body').off('scroll touchmove mousewheel'); // 핸들러 제거
+}
+
+$(function () {
+    let offset;
+    $(".review-button").click(function () {
+        offset = $(".riview").offset();
+        $(".modal").fadeIn();
+        scrollDisable();
+    });
+
+    $(".esc").click(function () {
+        $("html, body").animate({ scrollTop: offset.top }, 400);
+        $(".modal").fadeOut();
+        scrollAble();
+    });
+});
+
+
+$(document).ready(function(){
+    $(document).on('click','.submit',function(){
+        let $form = $("#modal_form");
+        let params = $form.serialize();
+        let boolean = check($form);
+        console.log(boolean);
+    });
+    function check($form){
+        let pw = $form.find('[name="pw"]');
+        let content = $form.find('[name="content"]');
+        if(pw.val() == '' || pw.val().length != 4){
+            alert("비밀번호가 틀렸습니다.");
+            return false;
+        }
+        if(content.val() == ''){
+            alert("내용을 입력하세요.");
+            return false;
+        }
+        return true;
+    } 
+});
+
+
+// modal 관련 script end
