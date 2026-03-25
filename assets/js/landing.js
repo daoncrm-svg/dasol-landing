@@ -1009,7 +1009,17 @@ function bindStandardFormSecure(form) {
       }
 
       if (!response.ok || !result.ok) {
-        showResultToast('error', '접수 실패', '요청 처리 중 문제가 발생했습니다.<br>잠시 후 다시 시도해 주세요.');
+        let errorMsg = '요청 처리 중 문제가 발생했습니다.<br>잠시 후 다시 시도해 주세요.';
+        let toastTitle = '접수 실패';
+        if (result.errors && Array.isArray(result.errors) && result.errors.length > 0) {
+          errorMsg = result.errors.join('<br>');
+          toastTitle = '입력 확인';
+        } else if (result.error && typeof result.error === 'string') {
+          errorMsg = result.error;
+        } else if (result.message) {
+          errorMsg = result.message;
+        }
+        showResultToast('error', toastTitle, errorMsg);
         return;
       }
 
