@@ -1,4 +1,4 @@
-node_modules/
+﻿node_modules/
 .DS_Store
 Thumbs.db
 *.log
@@ -7,7 +7,7 @@ Thumbs.db
 .omx/
 __pycache__/
 
-# ===== Playwright / 테스트 스크린샷 (루트) =====
+# ===== Playwright / ?뚯뒪???ㅽ겕由곗꺑 (猷⑦듃) =====
 /*.png
 /*.jpg
 /*.jpeg
@@ -17,3 +17,10 @@ __pycache__/
 # ===== IDE =====
 .vscode/
 .idea/
+REFRESH_TOKEN.txt
+
+tools/get-refresh-token.js
+
+tools/check-google-ads-connection.js
+
+
