@@ -184,6 +184,9 @@
                         gtag('event', 'thank_you_page_view', thankYouPayload);
                     }
 
+                    if (typeof fbq === 'function') {
+                        fbq('track', 'Lead');
+                    }
                     sessionStorage.removeItem('completeData');
                 } catch (e) {
                     console.error('Failed to parse complete data:', e);
