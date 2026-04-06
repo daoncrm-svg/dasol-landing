@@ -1035,11 +1035,6 @@ function bindStandardFormSecure(form) {
         lead_phone_masked: phoneValue.replace(/\d{4}$/, '****')
       });
 
-      // [추가] 메타 픽셀 전환 추적: 무료 상담 신청(폼 제출)이 성공적으로 완료되었을 때 Lead 로깅
-      if (typeof fbq === 'function') {
-        fbq('track', 'Lead');
-      }
-
       if (result.webhookDelivered === false) {
         console.warn('Lead saved, but webhook delivery failed.');
       }
