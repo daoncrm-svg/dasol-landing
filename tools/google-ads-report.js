@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const GOOGLE_ADS_API_VERSION = 'v22';
 
 const REQUIRED_ENV = [
   'GOOGLE_ADS_DEVELOPER_TOKEN',
@@ -7,6 +8,20 @@ const REQUIRED_ENV = [
   'GOOGLE_ADS_REFRESH_TOKEN',
   'GOOGLE_ADS_CUSTOMER_ID'
 ];
+
+const fs = require('fs');
+const path = require('path');
+const envPath = path.resolve(process.cwd(), '.env');
+if (fs.existsSync(envPath)) {
+  fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
+    const match = line.match(/^([^=]+)=(.*)$/);
+    if (match) {
+      const key = match[1].trim();
+      const val = match[2].trim();
+      process.env[key] = val;
+    }
+  });
+}
 
 function getMissingEnv() {
   return REQUIRED_ENV.filter((name) => !process.env[name]);
@@ -39,6 +54,7 @@ async function fetchAccessToken() {
 async function queryGoogleAds(accessToken, query) {
   const customerId = process.env.GOOGLE_ADS_CUSTOMER_ID.replace(/-/g, '');
   const url = `https://googleads.googleapis.com/${GOOGLE_ADS_API_VERSION}/customers/${customerId}/googleAds:searchStream`;
+  console.log('Calling URL:', url);
   const headers = {
     Authorization: `Bearer ${accessToken}`,
     'developer-token': process.env.GOOGLE_ADS_DEVELOPER_TOKEN,
@@ -98,17 +114,9 @@ async function main() {
         campaign.id,
         campaign.name,
         campaign.advertising_channel_type,
-        campaign.status,
-        metrics.impressions,
-        metrics.clicks,
-        metrics.cost_micros,
-        metrics.conversions,
-        metrics.conversions_value,
-        metrics.average_cpc,
-        segments.date
+        campaign.status
       FROM campaign
-      WHERE segments.date DURING LAST_7_DAYS
-      ORDER BY segments.date DESC, campaign.id
+      WHERE campaign.status = 'ENABLED'
     `);
 
   const stream = await queryGoogleAds(accessToken, query);
@@ -120,4 +128,3 @@ main().catch((error) => {
   console.error(error.message || error);
   process.exit(1);
 });
-const GOOGLE_ADS_API_VERSION = 'v22';
