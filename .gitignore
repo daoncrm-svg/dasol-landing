@@ -1,4 +1,4 @@
-﻿node_modules/
+node_modules/
 .DS_Store
 Thumbs.db
 *.log
@@ -23,4 +23,5 @@ tools/get-refresh-token.js
 
 tools/check-google-ads-connection.js
 
-
+# ===== Credentials =====
+client_secret_*.json
