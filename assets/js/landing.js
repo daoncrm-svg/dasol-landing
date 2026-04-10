@@ -17,13 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initForms();
   initFloatingFormVisibility();
   initFixedBottomBar();
+  initMobileMinimalCtaVisibility();
   initNavTracking();
   initSmoothScroll();
   initTrustNumbers();
   injectResultToast();
   initHamburger();
   initConsentAll();
-  initFraudPopup();
 });
 
 const LeadUtils = globalThis.LeadUtils;
@@ -141,6 +141,16 @@ function initPhoneClickTracking() {
       if (typeof gtag === 'function') {
         gtag('event', 'phone_click', eventPayload);
       }
+
+      // Meta Pixel: 전화번호 클릭 커스텀 이벤트
+      if (typeof fbq === 'function') {
+        fbq('trackCustom', 'PhoneClick', {
+          phone_href: eventPayload.phone_href,
+          click_context: eventPayload.click_context,
+          content_name: '전화문의',
+          source_page: window.location.pathname
+        });
+      }
     });
   });
 }
@@ -151,7 +161,8 @@ function initCtaClickTracking() {
     '.lp-spec-cta a',
     '.float-btn.apply',
     '.trust-card.product-link',
-    '.nav-link[href*="cta"]'
+    '.nav-link[href*="cta"]',
+    '.fab-item'
   ].join(', ');
 
   document.querySelectorAll(ctaSelector).forEach((element) => {
@@ -177,6 +188,16 @@ function initCtaClickTracking() {
 
       if (typeof gtag === 'function') {
         gtag('event', 'cta_click', eventPayload);
+      }
+
+      // Meta Pixel: CTA 클릭 커스텀 이벤트
+      if (typeof fbq === 'function') {
+        fbq('trackCustom', 'CtaClick', {
+          click_text: eventPayload.click_text,
+          click_target: eventPayload.click_target,
+          click_context: eventPayload.click_context,
+          source_page: window.location.pathname
+        });
       }
     });
   });
@@ -246,6 +267,18 @@ function initLeadSubmitTracking() {
       const phoneValue = phoneInput ? phoneInput.value.trim() : '';
 
       trackLeadSubmitAttempt(form, submitBtn, phoneValue, nameValue);
+
+      // Meta Pixel: 폼 제출 시도 (표준 이벤트 InitiateCheckout)
+      // 주의: 최종 Lead 이벤트는 서버(CAPI)에서 발송하므로 여기서는 '시도'만 기록
+      if (typeof fbq === 'function') {
+        fbq('track', 'InitiateCheckout', {
+          content_name: form.id || 'inquiry_form',
+          content_category: detectFormVariant(form),
+          num_items: 1,
+          value: 0,
+          currency: 'KRW'
+        });
+      }
 
       if (nameInput && !nameValue) {
         trackLeadValidationError(form, 'name', '이름을 입력해 주세요.');
@@ -531,6 +564,8 @@ function initForms() {
   });
 
   document.querySelectorAll('form').forEach((/** @type {HTMLFormElement} */ form) => {
+
+
     bindStandardFormSecure(form);
   });
 }
@@ -586,330 +621,11 @@ function sendLeadConversion(phone, onComplete) {
 }
 
 /**
- * 폼에 유효성 검증 및 제출 처리 로직을 바인딩합니다.
- * 성공 시 Supabase 리드 테이블에 입력 값을 Insert 하고 토스트 UI를 표시합니다.
+ * 폼에 유효성 검증 및 보안 제출 처리 로직을 바인딩합니다.
+ * 성공 시 서버 API를 통해 리드를 저장하고 전환 완료 페이지로 이동합니다.
  * @param {HTMLFormElement} form - 바인딩할 폼 요소
  * @returns {void}
  */
-function bindStandardForm(form) {
-  bindStandardFormSecure(form);
-  return;
-
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-
-    /** @type {HTMLInputElement | null} */
-    const nameInput = form.querySelector('input[name*="name"]');
-    if (nameInput && !nameInput.value.trim()) {
-      reportFieldError(nameInput, '이름을 입력해 주세요.');
-      return;
-    }
-
-    /** @type {HTMLInputElement | null} */
-    const phoneInput = form.querySelector('input[type="tel"]');
-    if (phoneInput && !validatePhone(phoneInput.value)) {
-      reportFieldError(phoneInput, '전화번호를 확인해 주세요.');
-      return;
-      reportFieldError(phoneInput, '휴대폰 번호를 정확히 입력해 주세요.');
-      return;
-    }
-
-    /** @type {HTMLSelectElement | null} */
-    const typeSelect = form.querySelector('select[name*="propertyType"], select[name="loanType"]');
-    if (typeSelect && !typeSelect.value) {
-      reportFieldError(typeSelect, '대출 상품을 선택해 주세요.');
-      return;
-    }
-
-    /** @type {HTMLInputElement | null} */
-    const consentInput = form.querySelector('input[name="consent"], input[name="consentAll"]');
-    if (consentInput && !consentInput.checked) {
-      reportFieldError(consentInput, '개인정보 수집 및 이용에 동의해 주세요.');
-      return;
-    }
-
-    /** @type {HTMLButtonElement | null} */
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalBtnText = submitBtn ? submitBtn.innerText : '무료 상담 신청 ❯';
-    if (submitBtn) {
-      submitBtn.innerText = '신청 중...';
-      submitBtn.disabled = true;
-    }
-
-    showResultToast('loading', '신청 접수 중', '서버로 데이터를 안전하게 전송하고 있습니다.<br>잠시만 기다려주세요.');
-
-    try {
-      const ip = await getClientIp();
-      const typeText = typeSelect && typeSelect.selectedIndex >= 0 ? typeSelect.options[typeSelect.selectedIndex].text : '';
-      
-      /** @type {HTMLInputElement | null} */
-      const sourcePageInput = form.querySelector('input[name="source_page"]');
-      const sourcePage = sourcePageInput ? sourcePageInput.value : '이벤트페이지';
-
-      // 광고 추적 데이터 (gclid, UTM, referrer 등)
-      const adData = getAdTrackingData();
-
-      // 폼 식별자: form id가 있으면 사용, 없으면 부모 섹션 기반 추론
-      const formVariant = detectFormVariant(form);
-
-      // 중복 제출 감지
-      const isDuplicate = checkDuplicateSubmission(phoneInput ? phoneInput.value.trim() : '');
-
-      const payload = {
-        name: nameInput ? nameInput.value.trim() : '',
-        phone: phoneInput ? phoneInput.value.trim() : '',
-        source: sourcePage,
-        status: 'New',
-        inquiry_form: typeText,
-        created_at: new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().replace('Z', '+09:00'),
-        // 광고 식별자
-        gclid: adData.gclid || null,
-        gbraid: adData.gbraid || null,
-        wbraid: adData.wbraid || null,
-        // UTM 파라미터
-        utm_source: adData.utm_source || null,
-        utm_medium: adData.utm_medium || null,
-        utm_campaign: adData.utm_campaign || null,
-        utm_term: adData.utm_term || null,
-        utm_content: adData.utm_content || null,
-        // 유입 문맥
-        referrer: adData.referrer || null,
-        landing_url: adData.landing_url || null,
-        device_type: adData.device_type || null,
-        // 폼 식별 + 품질
-        form_variant: formVariant,
-        is_duplicate: isDuplicate
-      };
-
-      const { error } = await window.supabaseClient.from('lead').insert([payload]);
-
-      // 웹훅 전송용 페이로드: n8n/Zapier 요구사항에 맞춰 Form 데이터로 변환 (각각의 변수로 폼 구성)
-      const formData = new FormData();
-      formData.append('name', payload.name);
-      formData.append('phone', payload.phone);
-      formData.append('source', payload.source);
-      formData.append('status', payload.status);
-      formData.append('inquiry_form', payload.inquiry_form);
-      formData.append('created_at', payload.created_at);
-      formData.append('sort', typeText);
-      formData.append('ip', ip);
-
-      // n8n / Zapier 등 외부 웹훅 전송 (에러가 나도 메인 로직에는 영향 없도록 catch 처리)
-      try {
-        const webhookUrl = 'https://daon1019.com/webhook/addscapcokr';
-        
-        // FormData를 사용하면 브라우저가 자동으로 multipart/form-data 헤더를 세팅하며 CORS Preflight도 발생하지 않음
-        await fetch(webhookUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          body: formData
-        });
-      } catch (webhookErr) {
-        console.error('Webhook Error:', webhookErr);
-      }
-
-      if (error) {
-        console.error('Supabase Insert Error:', error);
-        showResultToast('error', '접수 실패', '앗, 데이터베이스 연결 중 지연이 발생했습니다.<br>다시 한번 시도해 주시거나 전화 상담을 이용해주세요.');
-      } else {
-        if (window.incrementCtaCounter) window.incrementCtaCounter();
-
-        // Google Ads / GA4 전환 이벤트 (dataLayer)
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({
-          event: 'form_submission_success',
-          form_name: form.id || 'inquiry',
-          lead_type: typeText,
-          lead_name: payload.name,
-          lead_phone_masked: payload.phone.replace(/\d{4}$/, '****')
-        });
-
-        // 전환 완료 페이지로 데이터 전달 (sessionStorage)
-        sessionStorage.setItem('completeData', JSON.stringify({
-          name: payload.name,
-          phone: payload.phone,
-          type: typeText
-        }));
-
-        // 전환 완료 페이지로 이동
-        window.location.href = 'complete.html';
-        return;
-      }
-    } catch (err) {
-      console.error('Unexpected Form Submit Error:', err);
-      showResultToast('error', '예기치 않은 오류', '일시적인 서버 문제가 발생했습니다.<br>1866-1019로 연락주시면 바로 안내 도와드리겠습니다.');
-    } finally {
-      if (submitBtn) {
-        submitBtn.innerText = originalBtnText;
-        submitBtn.disabled = false;
-      }
-    }
-  });
-}
-
-
-/**
- * 전화번호 문자열의 유효성(010/011/016/017/018/019 + 7~8자리)을 검증합니다.
- * @param {string} value - 검증할 전화번호 문자열
- * @returns {boolean} 유효하면 true, 그렇지 않으면 false
- */
-const __unusedSecureBinder = String.raw`
-function bindStandardFormSecure(form) {
-  ensureHoneypotField(form);
-
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-
-    /** @type {HTMLInputElement | null} */
-    const nameInput = form.querySelector('input[name*="name"]');
-    if (nameInput && !nameInput.value.trim()) {
-      reportFieldError(nameInput, '?대쫫???낅젰??二쇱꽭??');
-      return;
-    }
-
-    /** @type {HTMLInputElement | null} */
-    const phoneInput = form.querySelector('input[type="tel"]');
-    if (phoneInput && !validatePhone(phoneInput.value)) {
-      reportFieldError(phoneInput, '?대???踰덊샇瑜??뺥솗???낅젰??二쇱꽭??');
-      return;
-    }
-
-    /** @type {HTMLSelectElement | null} */
-    const typeSelect = form.querySelector('select[name*="propertyType"], select[name="loanType"]');
-    if (typeSelect && !typeSelect.value) {
-      reportFieldError(typeSelect, '?異??곹뭹???좏깮??二쇱꽭??');
-      return;
-    }
-
-    /** @type {HTMLInputElement | null} */
-    const privacyConsentInput = form.querySelector('input[name="consentPrivacy"], input[name="consent"]');
-    if (privacyConsentInput && !privacyConsentInput.checked) {
-      reportFieldError(privacyConsentInput, '媛쒖씤?뺣낫 ?섏쭛 諛??댁슜???숈쓽??二쇱꽭??');
-      return;
-    }
-
-    /** @type {HTMLInputElement | null} */
-    const thirdPartyConsentInput = form.querySelector('input[name="consentThirdParty"]');
-    if (thirdPartyConsentInput && !thirdPartyConsentInput.checked) {
-      reportFieldError(thirdPartyConsentInput, '媛쒖씤?뺣낫 ?쒓났 ?숈쓽媛 ?꾩슂?⑸땲??');
-      return;
-    }
-
-    /** @type {HTMLButtonElement | null} */
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalBtnText = submitBtn ? submitBtn.innerText : '臾대즺 ?곷떞 ?좎껌';
-    if (submitBtn) {
-      submitBtn.innerText = '?좎껌 以?..';
-      submitBtn.disabled = true;
-    }
-
-    showResultToast('loading', '?좎껌 ?묒닔 以?, '?쒕쾭濡??곗씠?곕? ?덉쟾?섍쾶 ?꾩넚?섍퀬 ?덉뒿?덈떎.<br>?좎떆留?湲곕떎?ㅼ＜?몄슂.');
-
-    try {
-      const typeText = typeSelect && typeSelect.selectedIndex >= 0 ? typeSelect.options[typeSelect.selectedIndex].text : '';
-
-      /** @type {HTMLInputElement | null} */
-      const sourcePageInput = form.querySelector('input[name="source_page"]');
-      const sourcePage = sourcePageInput ? sourcePageInput.value : '?대깽?명럹?댁?';
-
-      /** @type {HTMLInputElement | null} */
-      const marketingConsentInput = form.querySelector('input[name="consentMarketing"]');
-
-      /** @type {HTMLInputElement | null} */
-      const honeypotInput = form.querySelector('input[name="website"]');
-
-      const phoneValue = phoneInput ? phoneInput.value.trim() : '';
-      const payload = {
-        name: nameInput ? nameInput.value.trim() : '',
-        phone: phoneValue,
-        source: sourcePage,
-        inquiryForm: typeText,
-        formVariant: detectFormVariant(form),
-        isDuplicate: hasSubmittedPhone(phoneValue),
-        consents: {
-          privacy: Boolean(privacyConsentInput && privacyConsentInput.checked),
-          thirdParty: Boolean(thirdPartyConsentInput && thirdPartyConsentInput.checked),
-          marketing: Boolean(marketingConsentInput && marketingConsentInput.checked)
-        },
-        adData: getAdTrackingData(),
-        website: honeypotInput ? honeypotInput.value : '',
-        sessionDurationMs: getSessionDurationMs()
-      };
-
-      const response = await fetch('/api/lead', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      /** @type {{ ok?: boolean, displayData?: { name?: string, phone?: string, type?: string }, webhookDelivered?: boolean }} */
-      let result = {};
-      try {
-        result = await response.json();
-      } catch {
-        result = {};
-      }
-
-      if (!response.ok || !result.ok) {
-        showResultToast('error', '?묒닔 ?ㅽ뙣', '?? ?곗씠?곕쿋?댁뒪 ?곌껐 以?吏?곗씠 諛쒖깮?덉뒿?덈떎.<br>?ㅼ떆 ?쒕쾲 ?쒕룄??二쇱떆嫄곕굹 ?꾪솕 ?곷떞???댁슜?댁＜?몄슂.');
-        return;
-      }
-
-      if (window.incrementCtaCounter) window.incrementCtaCounter();
-      rememberSubmittedPhone(phoneValue);
-
-      const leadEventPayload = {
-        form_name: form.id || 'inquiry',
-        lead_type: typeText,
-        lead_name: payload.name,
-        lead_phone_masked: phoneValue.replace(/\d{4}$/, '****')
-      };
-
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({
-        event: 'form_submission_success',
-        ...leadEventPayload
-      });
-
-      if (typeof gtag === 'function') {
-        gtag('event', 'generate_lead', {
-          currency: 'KRW',
-          value: 1,
-          ...leadEventPayload
-        });
-      }
-
-      if (result.webhookDelivered === false) {
-        console.warn('Lead saved, but webhook delivery failed.');
-      }
-
-      sessionStorage.setItem('completeData', JSON.stringify(
-        result.displayData || LeadUtils.createSafeCompleteData({
-          name: payload.name,
-          phone: phoneValue,
-          type: typeText
-        })
-      ));
-
-      sendLeadConversion(phoneValue, () => {
-        window.location.href = COMPLETE_PAGE_PATH;
-      });
-      return;
-    } catch (err) {
-      console.error('Unexpected Form Submit Error:', err);
-      showResultToast('error', '?덇린移??딆? ?ㅻ쪟', '?쇱떆?곸씤 ?쒕쾭 臾몄젣媛 諛쒖깮?덉뒿?덈떎.<br>1866-1019濡??곕씫二쇱떆硫?諛붾줈 ?덈궡 ?꾩??쒕━寃좎뒿?덈떎.');
-    } finally {
-      if (submitBtn) {
-        submitBtn.innerText = originalBtnText;
-        submitBtn.disabled = false;
-      }
-    }
-  });
-}
-
-`;
 function bindStandardFormSecure(form) {
   ensureHoneypotField(form);
 
@@ -930,10 +646,17 @@ function bindStandardFormSecure(form) {
       return;
     }
 
-    /** @type {HTMLSelectElement | null} */
-    const typeSelect = form.querySelector('select[name*="propertyType"], select[name="loanType"]');
+    /** @type {HTMLSelectElement | HTMLInputElement | null} */
+    const typeSelect = form.querySelector('select[name*="propertyType"], select[name="loanType"], input[name="loanType"]');
     if (typeSelect && !typeSelect.value) {
       reportFieldError(typeSelect, '대출 상품을 선택해 주세요.');
+      return;
+    }
+
+    /** @type {HTMLInputElement | null} */
+    const businessNameInput = form.querySelector('input[name="businessName"]');
+    if (businessNameInput && !businessNameInput.value.trim()) {
+      reportFieldError(businessNameInput, '사업자명을 입력해 주세요.');
       return;
     }
 
@@ -962,7 +685,14 @@ function bindStandardFormSecure(form) {
     showResultToast('loading', '신청 접수 중', '서버로 데이터를 안전하게 전송하고 있습니다.<br>잠시만 기다려주세요.');
 
     try {
-      const typeText = typeSelect && typeSelect.selectedIndex >= 0 ? typeSelect.options[typeSelect.selectedIndex].text : '';
+      let typeText = '';
+      if (typeSelect) {
+        if (typeSelect.tagName === 'SELECT') {
+          typeText = typeSelect.selectedIndex >= 0 ? typeSelect.options[typeSelect.selectedIndex].text : '';
+        } else {
+          typeText = typeSelect.value;
+        }
+      }
 
       /** @type {HTMLInputElement | null} */
       const sourcePageInput = form.querySelector('input[name="source_page"]');
@@ -975,9 +705,26 @@ function bindStandardFormSecure(form) {
       const honeypotInput = form.querySelector('input[name="website"]');
 
       const phoneValue = phoneInput ? phoneInput.value.trim() : '';
+      
+      /** @type {HTMLInputElement | null} */
+      const amountInput = form.querySelector('input[name="amount"]');
+      /** @type {HTMLTextAreaElement | null} */
+      const inquiryInput = form.querySelector('textarea[name="inquiry"]');
+      
+      /** @type {HTMLInputElement | null} */
+      const unknownBizNumCheck = form.querySelector('input[name="unknownBizNum"]');
+      /** @type {HTMLInputElement | null} */
+      const businessNumberInput = form.querySelector('input[name="businessNumber"]');
+      
       const payload = {
         name: nameInput ? nameInput.value.trim() : '',
         phone: phoneValue,
+        businessName: businessNameInput ? businessNameInput.value.trim() : '',
+        businessNumber: (unknownBizNumCheck && unknownBizNumCheck.checked) 
+                          ? '기억안남' 
+                          : (businessNumberInput ? businessNumberInput.value.trim() : ''),
+        amount: amountInput ? amountInput.value.trim() : '',
+        inquiry: inquiryInput ? inquiryInput.value.trim() : '',
         source: sourcePage,
         inquiryForm: typeText,
         formVariant: detectFormVariant(form),
@@ -992,7 +739,11 @@ function bindStandardFormSecure(form) {
         sessionDurationMs: getSessionDurationMs()
       };
 
-      const response = await fetch('/api/lead', {
+      const apiUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? 'http://localhost:8000/api/lead'
+        : '/api/lead';
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -1039,13 +790,14 @@ function bindStandardFormSecure(form) {
         console.warn('Lead saved, but webhook delivery failed.');
       }
 
-      sessionStorage.setItem('completeData', JSON.stringify(
-        result.displayData || LeadUtils.createSafeCompleteData({
+      const returnUrl = window.location.pathname.split('/').pop() || 'index.html';
+      const storageData2 = result.displayData || LeadUtils.createSafeCompleteData({
           name: payload.name,
           phone: phoneValue,
           type: typeText
-        })
-      ));
+      });
+      storageData2.returnUrl = returnUrl;
+      sessionStorage.setItem('completeData', JSON.stringify(storageData2));
 
       sendLeadConversion(phoneValue, () => {
         window.location.href = COMPLETE_PAGE_PATH;
@@ -1144,6 +896,33 @@ function initFixedBottomBar() {
 
     fixedBottomBar.classList.toggle('visible', shouldShow);
   }, { passive: true });
+}
+
+function initMobileMinimalCtaVisibility() {
+  /** @type {HTMLElement | null} */
+  const minimalCta = document.querySelector('.mobile-minimal-cta');
+  if (!minimalCta) return;
+
+  /** @type {HTMLElement | null} */
+  const heroSection = document.querySelector('#hero, .lp-hero, .hero');
+  if (!heroSection) {
+    minimalCta.classList.add('visible');
+    return;
+  }
+
+  const checkVisibility = () => {
+    const rect = heroSection.getBoundingClientRect();
+    // 히어로 섹션이 화면의 절반 이상 위로 올라가면 하단 바 표시
+    if (rect.bottom < window.innerHeight * 0.5) {
+      minimalCta.classList.add('visible');
+    } else {
+      minimalCta.classList.remove('visible');
+    }
+  };
+
+  window.addEventListener('scroll', checkVisibility, { passive: true });
+  // 초기 로드 시 한 번 실행
+  checkVisibility();
 }
 
 /**
@@ -1629,27 +1408,31 @@ function initConsentAll() {
 }
 
 /**
- * @description 보이스피싱 경고 팝업 - 하루 동안 그만보기 (localStorage)
+ * 모바일 특화 바텀 시트를 엽니다.
  */
-function initFraudPopup() {
-  const overlay = document.getElementById('fraudPopup');
-  const closeBtn = document.getElementById('fraudPopupClose');
-  const hideCheck = document.getElementById('fraudPopupHide');
-  if (!overlay || !closeBtn) return;
-
-  const STORAGE_KEY = 'fraudPopupHideUntil';
-  const hideUntil = localStorage.getItem(STORAGE_KEY);
-
-  if (hideUntil && Date.now() < Number(hideUntil)) {
-    overlay.classList.add('hidden');
-    return;
+window.openMobileLeadSheet = function() {
+  const overlay = document.getElementById('mobileSheetOverlay');
+  const sheet = document.getElementById('mobileLeadSheet');
+  
+  if (overlay && sheet) {
+    overlay.classList.add('active');
+    sheet.classList.add('active');
+    document.body.style.overflow = 'hidden'; // 뒷배경 스크롤 방지
   }
+};
 
-  closeBtn.addEventListener('click', () => {
-    if (hideCheck && hideCheck.checked) {
-      const tomorrow = Date.now() + 24 * 60 * 60 * 1000;
-      localStorage.setItem(STORAGE_KEY, String(tomorrow));
-    }
-    overlay.classList.add('hidden');
-  });
-}
+/**
+ * 모바일 특화 바텀 시트를 닫습니다.
+ */
+window.closeMobileLeadSheet = function() {
+  const overlay = document.getElementById('mobileSheetOverlay');
+  const sheet = document.getElementById('mobileLeadSheet');
+  
+  if (overlay && sheet) {
+    overlay.classList.remove('active');
+    sheet.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+};
+
+
