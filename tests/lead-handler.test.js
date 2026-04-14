@@ -72,6 +72,7 @@ test('builds a lead payload with legacy database fields intact', () => {
       adPlatform: 'GOOGLE_ADS',
       campaignChannel: 'SA',
       campaignName: 'sa_event',
+      sourcePlatformLabel: 'GOOGLE',
       trafficLabel: 'GOOGLE_ADS | SA'
     },
     adData: {
@@ -93,7 +94,7 @@ test('builds a lead payload with legacy database fields intact', () => {
   assert.equal(payload.inquiry_form, '주택');
   assert.equal(payload.form_variant, 'hero_form');
   assert.equal(payload.utm_medium, 'cpc');
-  assert.equal(payload.source, 'index | GOOGLE_ADS | SA');
+  assert.equal(payload.source, 'GOOGLE | index');
 });
 
 test('derives search and pmax attribution labels from ad data', () => {
@@ -111,6 +112,20 @@ test('derives search and pmax attribution labels from ad data', () => {
 
   assert.equal(sa.campaignChannel, 'SA');
   assert.equal(sa.trafficLabel, 'GOOGLE_ADS | SA');
+  assert.equal(sa.sourcePlatformLabel, 'GOOGLE');
   assert.equal(pmax.campaignChannel, 'PMAX');
   assert.equal(pmax.trafficLabel, 'GOOGLE_ADS | PMAX');
+  assert.equal(pmax.sourcePlatformLabel, 'GOOGLE');
+});
+
+test('derives meta attribution labels from ad data', () => {
+  const meta = deriveCampaignAttribution({
+    utm_source: 'facebook',
+    utm_medium: 'paid_social',
+    utm_campaign: 'meta_leads',
+    fbclid: 'fbclid-123'
+  });
+
+  assert.equal(meta.adPlatform, 'UNKNOWN');
+  assert.equal(meta.sourcePlatformLabel, 'META');
 });

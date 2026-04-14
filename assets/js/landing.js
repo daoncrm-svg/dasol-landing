@@ -43,7 +43,7 @@ if (!LeadUtils) {
 
 /** @type {readonly string[]} 수집 대상 URL 파라미터 목록 */
 const AD_TRACKING_PARAMS = /** @type {const} */ ([
-  'gclid', 'gbraid', 'wbraid',
+  'gclid', 'gbraid', 'wbraid', 'fbclid',
   'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'
 ]);
 
