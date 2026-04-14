@@ -154,11 +154,14 @@
         // sessionStorage??? ???????? ????? ???
         document.addEventListener('DOMContentLoaded', () => {
             const data = sessionStorage.getItem('completeData');
+            const pendingMetaLeadEventRaw = sessionStorage.getItem('pendingMetaLeadEvent');
             window.dataLayer = window.dataLayer || [];
+            let parsedCompleteData = null;
 
             if (data) {
                 try {
                     const parsed = JSON.parse(data);
+                    parsedCompleteData = parsed;
                     const infoBox = document.getElementById('completeInfoBox');
                     const nameEl = document.getElementById('completeName');
                     const phoneEl = document.getElementById('completePhone');
@@ -168,6 +171,11 @@
                     if (phoneEl && parsed.phone) phoneEl.textContent = parsed.phone;
                     if (typeEl && parsed.type) typeEl.textContent = parsed.type;
                     if (infoBox) infoBox.style.display = 'block';
+
+                    if (parsed.returnUrl) {
+                        const goHomeBtn = document.getElementById('btnGoHome');
+                        if (goHomeBtn) goHomeBtn.href = parsed.returnUrl;
+                    }
 
                     const thankYouPayload = {
                         lead_type: parsed.type || '',
@@ -187,6 +195,44 @@
                     sessionStorage.removeItem('completeData');
                 } catch (e) {
                     console.error('Failed to parse complete data:', e);
+                }
+            }
+
+            if (pendingMetaLeadEventRaw) {
+                try {
+                    const pendingMetaLeadEvent = JSON.parse(pendingMetaLeadEventRaw);
+                    const shouldReplayBrowserLead = !pendingMetaLeadEvent.browserTracked;
+
+                    if (shouldReplayBrowserLead) {
+                        const leadPayload = {
+                            content_name: pendingMetaLeadEvent.leadType || parsedCompleteData?.type || '상담 신청',
+                            content_category: pendingMetaLeadEvent.formVariant || 'unknown_form',
+                            source_page: pendingMetaLeadEvent.sourcePage || '',
+                            landing_url: pendingMetaLeadEvent.landingUrl || '',
+                            page_path: location.pathname
+                        };
+
+                        if (typeof fbq === 'function') {
+                            if (pendingMetaLeadEvent.eventId) {
+                                fbq('track', 'Lead', leadPayload, {
+                                    eventID: pendingMetaLeadEvent.eventId
+                                });
+                            } else {
+                                fbq('track', 'Lead', leadPayload);
+                            }
+                        }
+
+                        window.dataLayer.push({
+                            event: 'meta_browser_lead',
+                            ...leadPayload,
+                            meta_event_id: pendingMetaLeadEvent.eventId || '',
+                            trigger_context: 'complete_page_fallback'
+                        });
+                    }
+                } catch (e) {
+                    console.error('Failed to replay Meta lead event:', e);
+                } finally {
+                    sessionStorage.removeItem('pendingMetaLeadEvent');
                 }
             }
 

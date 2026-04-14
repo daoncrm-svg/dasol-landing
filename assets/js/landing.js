@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 const LeadUtils = globalThis.LeadUtils;
 const COMPLETE_PAGE_PATH = 'complete.html';
 const GOOGLE_ADS_CONVERSION_ID = 'AW-17385092218/iTvsCP6yjOAbEPro7eFA';
+const PENDING_META_LEAD_STORAGE_KEY = 'pendingMetaLeadEvent';
 
 if (!LeadUtils) {
   throw new Error('LeadUtils must be loaded before landing.js');
@@ -117,6 +118,58 @@ function getSessionDurationMs() {
   }
 
   return Math.max(0, Date.now() - firstSeenAt);
+}
+
+function createMetaEventId() {
+  if (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function') {
+    return globalThis.crypto.randomUUID();
+  }
+
+  return `meta-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function rememberPendingMetaLeadEvent(payload) {
+  try {
+    sessionStorage.setItem(PENDING_META_LEAD_STORAGE_KEY, JSON.stringify(payload));
+  } catch (error) {
+    console.warn('Unable to persist pending Meta lead event.', error);
+  }
+}
+
+function buildMetaLeadPayload(metaLeadEvent) {
+  return {
+    content_name: metaLeadEvent.leadType || '상담 신청',
+    content_category: metaLeadEvent.formVariant || 'unknown_form',
+    source_page: metaLeadEvent.sourcePage || '',
+    landing_url: metaLeadEvent.landingUrl || '',
+    page_path: window.location.pathname
+  };
+}
+
+function trackMetaLead(metaLeadEvent) {
+  if (typeof fbq !== 'function') {
+    return false;
+  }
+
+  const leadPayload = buildMetaLeadPayload(metaLeadEvent);
+
+  if (metaLeadEvent.eventId) {
+    fbq('track', 'Lead', leadPayload, {
+      eventID: metaLeadEvent.eventId
+    });
+  } else {
+    fbq('track', 'Lead', leadPayload);
+  }
+
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({
+    event: 'meta_browser_lead',
+    ...leadPayload,
+    meta_event_id: metaLeadEvent.eventId || '',
+    trigger_context: 'form_submit_success'
+  });
+
+  return true;
 }
 
 function initPhoneClickTracking() {
@@ -684,6 +737,11 @@ function bindStandardFormSecure(form) {
 
     showResultToast('loading', '신청 접수 중', '서버로 데이터를 안전하게 전송하고 있습니다.<br>잠시만 기다려주세요.');
 
+    // 모바일 바텀시트에서 제출한 경우, 즉시 시트를 닫아 로딩 토스트가 잘 보이도록 처리
+    if (typeof window.closeMobileLeadSheet === 'function') {
+      window.closeMobileLeadSheet();
+    }
+
     try {
       let typeText = '';
       if (typeSelect) {
@@ -705,6 +763,7 @@ function bindStandardFormSecure(form) {
       const honeypotInput = form.querySelector('input[name="website"]');
 
       const phoneValue = phoneInput ? phoneInput.value.trim() : '';
+      const metaEventId = createMetaEventId();
       
       /** @type {HTMLInputElement | null} */
       const amountInput = form.querySelector('input[name="amount"]');
@@ -728,6 +787,7 @@ function bindStandardFormSecure(form) {
         source: sourcePage,
         inquiryForm: typeText,
         formVariant: detectFormVariant(form),
+        metaEventId,
         isDuplicate: hasSubmittedPhone(phoneValue),
         consents: {
           privacy: Boolean(privacyConsentInput && privacyConsentInput.checked),
@@ -798,6 +858,24 @@ function bindStandardFormSecure(form) {
       });
       storageData2.returnUrl = returnUrl;
       sessionStorage.setItem('completeData', JSON.stringify(storageData2));
+      const pendingMetaLeadEvent = {
+        eventId: metaEventId,
+        leadType: typeText,
+        formVariant: payload.formVariant,
+        sourcePage: window.location.pathname,
+        landingUrl: payload.adData?.landing_url || window.location.href,
+        browserTracked: false
+      };
+
+      rememberPendingMetaLeadEvent(pendingMetaLeadEvent);
+
+      if (trackMetaLead(pendingMetaLeadEvent)) {
+        rememberPendingMetaLeadEvent({
+          ...pendingMetaLeadEvent,
+          browserTracked: true,
+          browserTrackedAt: Date.now()
+        });
+      }
 
       sendLeadConversion(phoneValue, () => {
         window.location.href = COMPLETE_PAGE_PATH;
